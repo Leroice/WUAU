@@ -7,22 +7,38 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0C80B921A6F3F58F76C31292 /* libPods-WUAU.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-WUAU.a */; };
+		028E47EE38824E2EA6D3302C /* PPRightGrotesk-WideBlack.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4F09ECE78B65493781CF06D6 /* PPRightGrotesk-WideBlack.ttf */; };
+		091B898C2FC46558001A1DC5 /* RNSystemIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = 091B898B2FC46542001A1DC5 /* RNSystemIcon.m */; };
+		091B898E2FC46635001A1DC5 /* RNSystemIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091B898A2FC464F9001A1DC5 /* RNSystemIcon.swift */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		558DB1D540B80E811FCC183A /* libPods-WUAU.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89DE92515E9FA37EBDBB913D /* libPods-WUAU.a */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
+		7FC628FBCEB84065A2B9B195 /* PPRightGrotesk-WideBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1BCAC660223C4737806AC40E /* PPRightGrotesk-WideBold.ttf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		8AB803CAD2C540CE8C887BDE /* PPRightGrotesk-WideMedium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 37EB7336BC3F4D9391DAD983 /* PPRightGrotesk-WideMedium.ttf */; };
+		A96B3F0D9050495C97FC5B92 /* PPRightGrotesk-WideVariable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 00C5A2BC6FDA4476BE28C356 /* PPRightGrotesk-WideVariable.ttf */; };
+		B061873BD4DA489DB8C6EB50 /* PPRightGrotesk-WideRegular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7AA759655008499F8FE05302 /* PPRightGrotesk-WideRegular.ttf */; };
+		E0C06E418EE414082CC2B689 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		00C5A2BC6FDA4476BE28C356 /* PPRightGrotesk-WideVariable.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "PPRightGrotesk-WideVariable.ttf"; path = "../assets/fonts/PPRightGrotesk-WideVariable.ttf"; sourceTree = "<group>"; };
+		091B898A2FC464F9001A1DC5 /* RNSystemIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNSystemIcon.swift; sourceTree = "<group>"; };
+		091B898B2FC46542001A1DC5 /* RNSystemIcon.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSystemIcon.m; sourceTree = "<group>"; };
+		091B898D2FC4655E001A1DC5 /* WUAU-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WUAU-Bridging-Header.h"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* WUAU.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WUAU.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = WUAU/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = WUAU/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = WUAU/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		3B4392A12AC88292D35C810B /* Pods-WUAU.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WUAU.debug.xcconfig"; path = "Target Support Files/Pods-WUAU/Pods-WUAU.debug.xcconfig"; sourceTree = "<group>"; };
-		5709B34CF0A7D63546082F79 /* Pods-WUAU.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WUAU.release.xcconfig"; path = "Target Support Files/Pods-WUAU/Pods-WUAU.release.xcconfig"; sourceTree = "<group>"; };
-		5DCACB8F33CDC322A6C60F78 /* libPods-WUAU.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WUAU.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BCAC660223C4737806AC40E /* PPRightGrotesk-WideBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "PPRightGrotesk-WideBold.ttf"; path = "../assets/fonts/PPRightGrotesk-WideBold.ttf"; sourceTree = "<group>"; };
+		37EB7336BC3F4D9391DAD983 /* PPRightGrotesk-WideMedium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "PPRightGrotesk-WideMedium.ttf"; path = "../assets/fonts/PPRightGrotesk-WideMedium.ttf"; sourceTree = "<group>"; };
+		4F09ECE78B65493781CF06D6 /* PPRightGrotesk-WideBlack.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "PPRightGrotesk-WideBlack.ttf"; path = "../assets/fonts/PPRightGrotesk-WideBlack.ttf"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = WUAU/AppDelegate.swift; sourceTree = "<group>"; };
+		7AA759655008499F8FE05302 /* PPRightGrotesk-WideRegular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "PPRightGrotesk-WideRegular.ttf"; path = "../assets/fonts/PPRightGrotesk-WideRegular.ttf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = WUAU/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		89DE92515E9FA37EBDBB913D /* libPods-WUAU.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WUAU.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B65F3FC2AA76515711560865 /* Pods-WUAU.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WUAU.release.xcconfig"; path = "Target Support Files/Pods-WUAU/Pods-WUAU.release.xcconfig"; sourceTree = "<group>"; };
+		DF6358B8E6E8F770E85213A9 /* Pods-WUAU.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WUAU.debug.xcconfig"; path = "Target Support Files/Pods-WUAU/Pods-WUAU.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -31,7 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0C80B921A6F3F58F76C31292 /* libPods-WUAU.a in Frameworks */,
+				558DB1D540B80E811FCC183A /* libPods-WUAU.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,11 +57,13 @@
 		13B07FAE1A68108700A75B9A /* WUAU */ = {
 			isa = PBXGroup;
 			children = (
+				091B898B2FC46542001A1DC5 /* RNSystemIcon.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				091B898D2FC4655E001A1DC5 /* WUAU-Bridging-Header.h */,
 			);
 			name = WUAU;
 			sourceTree = "<group>";
@@ -54,14 +72,27 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				5DCACB8F33CDC322A6C60F78 /* libPods-WUAU.a */,
+				89DE92515E9FA37EBDBB913D /* libPods-WUAU.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		723F4C5D9F364C90BBA4858A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				00C5A2BC6FDA4476BE28C356 /* PPRightGrotesk-WideVariable.ttf */,
+				4F09ECE78B65493781CF06D6 /* PPRightGrotesk-WideBlack.ttf */,
+				1BCAC660223C4737806AC40E /* PPRightGrotesk-WideBold.ttf */,
+				7AA759655008499F8FE05302 /* PPRightGrotesk-WideRegular.ttf */,
+				37EB7336BC3F4D9391DAD983 /* PPRightGrotesk-WideMedium.ttf */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				091B898A2FC464F9001A1DC5 /* RNSystemIcon.swift */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -74,6 +105,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				723F4C5D9F364C90BBA4858A /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -91,8 +123,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				3B4392A12AC88292D35C810B /* Pods-WUAU.debug.xcconfig */,
-				5709B34CF0A7D63546082F79 /* Pods-WUAU.release.xcconfig */,
+				DF6358B8E6E8F770E85213A9 /* Pods-WUAU.debug.xcconfig */,
+				B65F3FC2AA76515711560865 /* Pods-WUAU.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -104,13 +136,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "WUAU" */;
 			buildPhases = (
-				C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */,
+				A9CCFABC1335C9984ED89FF7 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
-				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
+				27A4FBFC1A749405DB0D24CF /* [CP] Embed Pods Frameworks */,
+				29CC2590EEA3CBF89335BE0D /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -130,7 +162,7 @@
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 2650;
 					};
 				};
 			};
@@ -159,6 +191,12 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				E0C06E418EE414082CC2B689 /* PrivacyInfo.xcprivacy in Resources */,
+				A96B3F0D9050495C97FC5B92 /* PPRightGrotesk-WideVariable.ttf in Resources */,
+				028E47EE38824E2EA6D3302C /* PPRightGrotesk-WideBlack.ttf in Resources */,
+				7FC628FBCEB84065A2B9B195 /* PPRightGrotesk-WideBold.ttf in Resources */,
+				B061873BD4DA489DB8C6EB50 /* PPRightGrotesk-WideRegular.ttf in Resources */,
+				8AB803CAD2C540CE8C887BDE /* PPRightGrotesk-WideMedium.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -181,7 +219,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"\\\"$WITH_ENVIRONMENT\\\" \\\"$REACT_NATIVE_XCODE\\\"\"\n";
 		};
-		00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */ = {
+		27A4FBFC1A749405DB0D24CF /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -198,7 +236,24 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WUAU/Pods-WUAU-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */ = {
+		29CC2590EEA3CBF89335BE0D /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-WUAU/Pods-WUAU-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-WUAU/Pods-WUAU-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WUAU/Pods-WUAU-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A9CCFABC1335C9984ED89FF7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -220,23 +275,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E235C05ADACE081382539298 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-WUAU/Pods-WUAU-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-WUAU/Pods-WUAU-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WUAU/Pods-WUAU-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -245,6 +283,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				091B898C2FC46558001A1DC5 /* RNSystemIcon.m in Sources */,
+				091B898E2FC46635001A1DC5 /* RNSystemIcon.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,11 +293,12 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-WUAU.debug.xcconfig */;
+			baseConfigurationReference = DF6358B8E6E8F770E85213A9 /* Pods-WUAU.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 74N2E56WEY;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = WUAU/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -274,6 +315,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = WUAU;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_OBJC_BRIDGING_HEADER = "WUAU-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -283,11 +325,12 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5709B34CF0A7D63546082F79 /* Pods-WUAU.release.xcconfig */;
+			baseConfigurationReference = B65F3FC2AA76515711560865 /* Pods-WUAU.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 74N2E56WEY;
 				INFOPLIST_FILE = WUAU/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -303,6 +346,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = WUAU;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_OBJC_BRIDGING_HEADER = "WUAU-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -370,6 +414,10 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
@@ -377,8 +425,13 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
 				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
+				USE_HERMES = true;
 			};
 			name = Debug;
 		};
@@ -435,6 +488,10 @@
 					"\"$(inherited)\"",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
@@ -442,8 +499,12 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
 				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
+				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

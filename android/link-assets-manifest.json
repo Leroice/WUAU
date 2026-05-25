@@ -1,0 +1,25 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/PPRightGrotesk-WideBlack.ttf",
+      "sha1": "19945a8ac514ff3e4de36ae38d433943238e94e5"
+    },
+    {
+      "path": "assets/fonts/PPRightGrotesk-WideBold.ttf",
+      "sha1": "610e037983a03f94cf0c1f626d6d47f39a00bffd"
+    },
+    {
+      "path": "assets/fonts/PPRightGrotesk-WideMedium.ttf",
+      "sha1": "b9945e81f58e31cb11892cc2321512c49e869c46"
+    },
+    {
+      "path": "assets/fonts/PPRightGrotesk-WideRegular.ttf",
+      "sha1": "517213a76ba3436c45a4552bc4280eee7fdd837a"
+    },
+    {
+      "path": "assets/fonts/PPRightGrotesk-WideVariable.ttf",
+      "sha1": "a86bcebd28fdde1144f458bd407854e1bfb7591c"
+    }
+  ]
+}
