@@ -305,7 +305,19 @@ const CardStackNav = createNativeStackNavigator();
 // vibrant primary label colour (#1A1A1A light / white dark) for title + controls.
 function useNavChrome() {
   const dark = useColorScheme() === 'dark';
+  const c = dark ? DARK : LIGHT;
   const label = dark ? '#FFFFFF' : '#1A1A1A';
+  if (Platform.OS === 'android') {
+    // Material 3 top app bar — solid surface, Roboto title (no iOS blur on Android).
+    return {
+      headerStyle: { backgroundColor: c.bg },
+      headerShadowVisible: false,
+      headerTintColor: label,
+      headerTitleStyle: { color: label, fontSize: 20, fontWeight: '600' as const },
+      headerLargeTitleStyle: { color: label },
+    };
+  }
+  // iOS 26 — Liquid Glass nav bar (Figma 754:48381).
   return {
     headerTransparent: true,
     headerBlurEffect: 'systemChromeMaterial' as const,
