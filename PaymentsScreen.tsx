@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, Theme, SPACING } from './theme';
-import { WidgetCard, ActionButton, StatusDot } from './components/ui';
+import { WidgetCard, ActionButton, StatusDot, NavButtonGroup } from './components/ui';
 import { Squishy } from './Squishy';
 import { SystemIcon } from './SystemIcon';
 import { usePersona } from './PersonaContext';
@@ -81,14 +81,11 @@ export function PaymentsScreen({ navigation }: any) {
       title: 'Payments',
       headerLargeTitle: false,
       headerLeft: () => (
-        <Pressable
-          hitSlop={10}
-          onPress={() => navigation.navigate('Settings')}
-          accessibilityRole="button"
-          accessibilityLabel="Profile and settings"
-        >
-          <SystemIcon ios="person" android="person" size={22} color={c.text} />
-        </Pressable>
+        <NavButtonGroup
+          items={[
+            { key: 'profile', label: 'Profile and settings', onPress: () => navigation.navigate('Settings'), render: (col) => <SystemIcon ios="person" android="person" size={20} color={col} /> },
+          ]}
+        />
       ),
     });
   }, [navigation, c]);

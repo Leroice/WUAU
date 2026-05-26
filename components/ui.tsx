@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { View, Text, Pressable, StyleSheet, StyleProp, ViewStyle, useColorScheme } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Squishy } from '../Squishy';
 import { SystemIcon, IconSpec } from '../SystemIcon';
@@ -17,6 +17,35 @@ export function WULogo({ color = '#000000', width = 36, height = 20 }: { color?:
         fill={color}
       />
     </Svg>
+  );
+}
+
+/**
+ * iOS 26 nav-bar button group (Figma 754:48381): a fully-rounded translucent
+ * "glass" pill (h44, px6, gap20) housing 36×36 icon buttons with proper touch
+ * targets. Used for header leading/trailing controls. `render(color)` draws each
+ * icon (so SVG icons + SystemIcon both work); color is the vibrant label colour.
+ */
+export function NavButtonGroup({
+  items,
+}: { items: { key: string; onPress?: () => void; label: string; render: (color: string) => React.ReactNode }[] }) {
+  const dark = useColorScheme() === 'dark';
+  const color = dark ? '#FFFFFF' : '#1A1A1A';
+  return (
+    <View style={[styles.navGroup, { backgroundColor: dark ? 'rgba(70,70,74,0.6)' : 'rgba(255,255,255,0.7)' }]}>
+      {items.map((it) => (
+        <Pressable
+          key={it.key}
+          onPress={it.onPress}
+          style={styles.navGroupBtn}
+          hitSlop={6}
+          accessibilityRole="button"
+          accessibilityLabel={it.label}
+        >
+          {it.render(color)}
+        </Pressable>
+      ))}
+    </View>
   );
 }
 
@@ -162,6 +191,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   surfacePad: { padding: SPACING.lg },
+  navGroup: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    height: 44, borderRadius: 22, paddingHorizontal: 6, gap: 20,
+    shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
+  },
+  navGroupBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   widgetHeader: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg },
   sectionHeader: {
     flexDirection: 'row',

@@ -22,7 +22,7 @@ import {
   IconPerson, IconEye,
 } from './Icons';
 import { SystemIcon } from './SystemIcon';
-import { WULogo, ActionButton, WidgetCard } from './components/ui';
+import { WULogo, ActionButton, WidgetCard, NavButtonGroup } from './components/ui';
 import { ParticleBalance } from './ParticleBalance';
 import { TweaksProvider } from './TweaksContext';
 import { Squishy } from './Squishy';
@@ -110,30 +110,19 @@ function HomeScreen({ navigation }: any) {
     navigation.setOptions({
       headerTitle: () => <WULogo color={dark ? '#FFFFFF' : '#000000'} />,
       headerLeft: () => (
-        <Pressable
-          hitSlop={10}
-          onPress={() => navigation.navigate('Settings')}
-          accessibilityRole="button"
-          accessibilityLabel="Profile and settings"
-        >
-          <IconPerson size={22} color={c.text} />
-        </Pressable>
+        <NavButtonGroup
+          items={[
+            { key: 'profile', label: 'Profile and settings', onPress: () => navigation.navigate('Settings'), render: (col) => <IconPerson size={20} color={col} /> },
+          ]}
+        />
       ),
       headerRight: () => (
-        <View style={styles.navRight}>
-          <Pressable hitSlop={10} onPress={openConvert} accessibilityRole="button" accessibilityLabel="Currency calculator">
-            <SystemIcon ios="plus.forwardslash.minus" android="calculate" size={22} color={c.text} />
-          </Pressable>
-          <Pressable
-            hitSlop={10}
-            onPress={() => setBalanceHidden((h) => !h)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: balanceHidden }}
-            accessibilityLabel={balanceHidden ? 'Show balance' : 'Hide balance'}
-          >
-            <IconEye size={22} color={c.text} />
-          </Pressable>
-        </View>
+        <NavButtonGroup
+          items={[
+            { key: 'calc', label: 'Currency calculator', onPress: openConvert, render: (col) => <SystemIcon ios="plus.forwardslash.minus" android="calculate" size={20} color={col} /> },
+            { key: 'eye', label: balanceHidden ? 'Show balance' : 'Hide balance', onPress: () => setBalanceHidden((h) => !h), render: (col) => <IconEye size={20} color={col} /> },
+          ]}
+        />
       ),
     });
   }, [navigation, dark, c, balanceHidden, openConvert]);

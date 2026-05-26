@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SETTINGS } from './mockData';
 import { Squishy } from './Squishy';
 import { SystemIcon } from './SystemIcon';
+import { NavButtonGroup } from './components/ui';
 import { WU_YELLOW } from './theme';
 import { usePersona, PERSONAS } from './PersonaContext';
 
@@ -60,6 +61,19 @@ export function SettingsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { persona, setPersona } = usePersona();
   const user = persona.user;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerBackVisible: false,
+      headerLeft: () => (
+        <NavButtonGroup
+          items={[
+            { key: 'close', label: 'Close settings', onPress: () => navigation.goBack(), render: (col) => <SystemIcon ios="xmark" android="close" size={18} color={col} /> },
+          ]}
+        />
+      ),
+    });
+  }, [navigation]);
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>

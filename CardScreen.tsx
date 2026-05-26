@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 import { CartesianChart, Line } from 'victory-native';
 import { useTheme, Theme, SPACING } from './theme';
-import { Surface, WidgetCard, ListRow, StatusDot, ActionButton } from './components/ui';
+import { Surface, WidgetCard, ListRow, StatusDot, ActionButton, NavButtonGroup } from './components/ui';
 import { Squishy } from './Squishy';
 import { SystemIcon } from './SystemIcon';
 import { WalletCard } from './WalletCard';
@@ -130,14 +130,11 @@ export function CardScreen({ navigation }: any) {
       title: 'Cards',
       headerLargeTitle: false,
       headerLeft: () => (
-        <Pressable
-          hitSlop={10}
-          onPress={() => navigation.navigate('Settings')}
-          accessibilityRole="button"
-          accessibilityLabel="Profile and settings"
-        >
-          <SystemIcon ios="person" android="person" size={22} color={c.text} />
-        </Pressable>
+        <NavButtonGroup
+          items={[
+            { key: 'profile', label: 'Profile and settings', onPress: () => navigation.navigate('Settings'), render: (col) => <SystemIcon ios="person" android="person" size={20} color={col} /> },
+          ]}
+        />
       ),
     });
   }, [navigation, c]);
