@@ -98,6 +98,7 @@ export function PaymentsScreen({ navigation }: any) {
       style={{ backgroundColor: c.bg }}
       contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 96 }]}
       showsVerticalScrollIndicator={false}
+      contentInsetAdjustmentBehavior="automatic"
     >
       {/* contacts */}
       <WidgetCard c={c} title={PAYMENTS_SECTIONS.contacts} onPressHeader={() => {}}>

@@ -151,6 +151,7 @@ export function CardScreen({ navigation }: any) {
       style={{ backgroundColor: c.bg }}
       contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 96 }]}
       showsVerticalScrollIndicator={false}
+      contentInsetAdjustmentBehavior="automatic"
     >
       <WalletCard flipped={flipped} onToggle={() => setFlipped((f) => !f)} />
 

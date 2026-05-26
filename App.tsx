@@ -146,6 +146,7 @@ function HomeScreen({ navigation }: any) {
         style={{ backgroundColor: c.bg }}
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
       >
         {/* BALANCE HERO */}
         <View style={styles.hero}>
@@ -299,16 +300,19 @@ const HomeStackNav = createNativeStackNavigator();
 const PaymentsStackNav = createNativeStackNavigator();
 const CardStackNav = createNativeStackNavigator();
 
-// Shared native-header chrome (background, tint, no hairline) driven by colour scheme.
+// Shared native-header chrome — iOS 26 nav bar (Figma node 754:48381):
+// translucent Liquid Glass material, SF Pro Semibold 17 title (letterSpacing -0.43),
+// vibrant primary label colour (#1A1A1A light / white dark) for title + controls.
 function useNavChrome() {
   const dark = useColorScheme() === 'dark';
-  const c = dark ? DARK : LIGHT;
+  const label = dark ? '#FFFFFF' : '#1A1A1A';
   return {
-    headerStyle: { backgroundColor: c.bg },
+    headerTransparent: true,
+    headerBlurEffect: 'systemChromeMaterial' as const,
     headerShadowVisible: false,
-    headerTintColor: c.accent,
-    headerTitleStyle: { color: c.text },
-    headerLargeTitleStyle: { color: c.text },
+    headerTintColor: label,
+    headerTitleStyle: { color: label, fontSize: 17, fontWeight: '600' as const, letterSpacing: -0.43 },
+    headerLargeTitleStyle: { color: label },
   };
 }
 

@@ -137,6 +137,7 @@ export function ComponentLibraryScreen({ navigation }: any) {
       style={{ backgroundColor: c.bg }}
       contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 40 }]}
       showsVerticalScrollIndicator={false}
+      contentInsetAdjustmentBehavior="automatic"
     >
       <Text style={[styles.intro, { color: c.muted }]}>
         Live design tokens — tweak a value and every instance across the app updates instantly.
