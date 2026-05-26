@@ -1,41 +1,48 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
+  Pressable,
   StyleSheet,
   useColorScheme,
   StatusBar,
   Animated,
   Easing,
+  Platform,
 } from 'react-native';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Svg, { Path } from 'react-native-svg';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LiquidGlassView, isLiquidGlassSupported } from '@callstack/liquid-glass';
 import {
-  IconHome, IconArrowUpDown, IconCreditCard,
-  IconPerson, IconEye, IconChevronRight,
+  IconPerson, IconEye,
 } from './Icons';
 import { SystemIcon } from './SystemIcon';
+import { WULogo, ActionButton, WidgetCard } from './components/ui';
 import { ParticleBalance } from './ParticleBalance';
-import { TweaksProvider, useTweaks } from './TweaksContext';
+import { TweaksProvider } from './TweaksContext';
 import { Squishy } from './Squishy';
-import { TweaksPanel } from './TweaksPanel';
+import { ConvertSheet } from './ConvertSheet';
+import { CardScreen } from './CardScreen';
+import { PaymentsScreen } from './PaymentsScreen';
+import { ComponentLibraryScreen } from './ComponentLibraryScreen';
+import { DesignProvider } from './DesignContext';
+import { PersonaProvider, usePersona } from './PersonaContext';
+import { WU_YELLOW } from './theme';
 import {
   ACCOUNTS,
   TOTAL_BALANCE,
-  AVAILABLE_BALANCE,
   CONTACTS,
   TRANSACTIONS,
   QUICK_ACTIONS,
+  HOME,
+  SETTINGS,
 } from './mockData';
 import { SettingsScreen } from './SettingsScreen';
-
-const WU_YELLOW = '#F5A623';
 
 // ─── LAYOUT METRICS ──────────────────────────────────────────────────────────
 const SCREEN_PAD = 20;
@@ -46,88 +53,40 @@ const CARD_WIDTH = 260;
 const LIGHT = {
   bg: '#F2F2F7',
   card: '#FFFFFF',
+  surface: '#FFFFFF',
   text: '#1C1C1E',
   muted: '#8E8E93',
   accent: '#1A6FD4',
   border: '#E5E5EA',
   pill: '#EBEBEB',
+  warning: '#EA7E00',
+  info: '#239AF6',
+  error: '#DC2626',
+  success: '#1A8A4A',
 };
 
 const DARK = {
   bg: '#000000',
   card: '#1C1C1E',
+  surface: '#1C1C1E',
   text: '#FFFFFF',
   muted: '#8E8E93',
   accent: '#4DA3FF',
   border: '#2C2C2E',
   pill: '#2C2C2E',
+  warning: '#EA7E00',
+  info: '#239AF6',
+  error: '#FF6B6B',
+  success: '#30D158',
 };
-
-function WULogo({ color = '#000000' }: { color?: string }) {
-  return (
-    <Svg width={36} height={20} viewBox="0 0 43 24" fill="none">
-      <Path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M12.2083 21.152C14.4031 24.9448 17.9936 24.9448 20.1883 21.152L21.416 19.0292L10.4319 0H0L12.2083 21.1485M35.3493 13.0211C34.5468 14.4031 32.6607 14.4031 31.8583 13.0211L24.3309 0H13.9058L26.1245 21.1554C28.3192 24.9482 31.9028 24.9482 34.0976 21.1554L42.2765 6.9855L38.2539 0H27.8323L35.3493 13.0211Z"
-        fill={color}
-      />
-    </Svg>
-  );
-}
-
-function GlassTabBar({ state, navigation }: any) {
-  const scheme = useColorScheme();
-  const dark = scheme === 'dark';
-  const c = dark ? DARK : LIGHT;
-  const insets = useSafeAreaInsets();
-
-  const tabs = [
-    { label: 'Home', Icon: IconHome },
-    { label: 'Payments', Icon: IconArrowUpDown },
-    { label: 'Card', Icon: IconCreditCard },
-  ];
-
-  const tabContent = (
-    <View style={styles.tabBarInner}>
-      {state.routes.map((route: any, index: number) => {
-        const isFocused = state.index === index;
-        const color = isFocused ? c.accent : c.muted;
-        const TabIcon = tabs[index].Icon;
-        const onPress = () => { if (!isFocused) navigation.navigate(route.name); };
-        return (
-          <TouchableOpacity key={route.key} onPress={onPress} style={styles.tabItem} accessibilityRole="button">
-            <TabIcon size={22} color={color} strokeWidth={isFocused ? 2.2 : 1.8} />
-            <Text style={{ fontSize: 11, fontWeight: '500', color }}>{tabs[index].label}</Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-
-  return (
-    <View style={[styles.tabBarOuter, { paddingBottom: insets.bottom }]}>
-      {isLiquidGlassSupported ? (
-        <LiquidGlassView
-          style={styles.glassTab}
-          glassEffectStyle={{ mode: 'regular', colorScheme: dark ? 'dark' : 'light' }}
-        >
-          {tabContent}
-        </LiquidGlassView>
-      ) : (
-        <View style={[styles.glassTab, { backgroundColor: c.card, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.border }]}>
-          {tabContent}
-        </View>
-      )}
-    </View>
-  );
-}
 
 function HomeScreen({ navigation }: any) {
   const scheme = useColorScheme();
   const dark = scheme === 'dark';
   const c = dark ? DARK : LIGHT;
   const insets = useSafeAreaInsets();
+  const { persona } = usePersona();
+  const { accounts, totalBalance, contacts, transactions } = persona;
   const [balanceHidden, setBalanceHidden] = useState(false);
   const reveal = useRef(new Animated.Value(0)).current; // 0 = balance shown, 1 = particles
 
@@ -142,176 +101,72 @@ function HomeScreen({ navigation }: any) {
   // Scales down from center as the balance returns (faux "blur out").
   const pillScale = reveal.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] });
 
-  // ─── Pull-to-reveal: total + available balances ───────────────────────────
-  const { tweaks } = useTweaks();
-  const { pullThreshold, expandGap, popBounce, collapseSwipe, swapMs } = tweaks;
-  const [expanded, setExpanded] = useState(false);
-  const expandedRef = useRef(false); // read synchronously in scroll handlers
-  const [mainKey, setMainKey] = useState<'total' | 'available'>('total');
-  const RECEDE = 130; // px of upward scroll over which the hero balance recedes
-  const expand = useRef(new Animated.Value(0)).current;
-  const swapFade = useRef(new Animated.Value(1)).current; // 1 = settled, dips to 0 mid-swap
-  const heroRecede = useRef(new Animated.Value(0)).current; // 0 = full, 1 = receded
-  const swappingRef = useRef(false);
-  const scrollRef = useRef<ScrollView>(null);
+  // Present the Convert screen as a native iOS sheet (formSheet) on the root stack.
+  const openConvert = () => navigation.navigate('Convert');
 
-  const main = mainKey === 'total' ? TOTAL_BALANCE : AVAILABLE_BALANCE;
-  const other = mainKey === 'total' ? AVAILABLE_BALANCE : TOTAL_BALANCE;
-  const mainLabel = mainKey === 'total' ? 'Total balance' : 'Available balance';
-  const otherLabel = mainKey === 'total' ? 'Available balance' : 'Total balance';
-
-  const setExpandedBoth = (v: boolean) => {
-    expandedRef.current = v;
-    setExpanded(v);
-  };
-
-  // Return to the original state with no overshoot.
-  const collapse = () => {
-    setExpandedBoth(false);
-    scrollRef.current?.scrollTo({ y: 0, animated: true });
-    Animated.spring(expand, { toValue: 0, useNativeDriver: false, speed: 16, bounciness: 0 }).start();
-  };
-
-  // Swap = simple crossfade + scale hint. Fade both balances out, swap the data while
-  // they're invisible (so no flicker), then fade back in.
-  const startSwap = () => {
-    if (swappingRef.current) return;
-    swappingRef.current = true;
-    Animated.timing(swapFade, { toValue: 0, duration: swapMs / 2, easing: Easing.in(Easing.quad), useNativeDriver: false }).start(({ finished }) => {
-      if (!finished) { swappingRef.current = false; return; }
-      setMainKey((k) => (k === 'total' ? 'available' : 'total'));
-      Animated.timing(swapFade, { toValue: 1, duration: swapMs / 2, easing: Easing.out(Easing.quad), useNativeDriver: false }).start(() => {
-        swappingRef.current = false;
-      });
+  // Native stack header: person (left), WU logo (title), calculator + eye (right).
+  // Plain native-style header buttons (no custom pill) — just tinted icons.
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => <WULogo color={dark ? '#FFFFFF' : '#000000'} />,
+      headerLeft: () => (
+        <Pressable
+          hitSlop={10}
+          onPress={() => navigation.navigate('Settings')}
+          accessibilityRole="button"
+          accessibilityLabel="Profile and settings"
+        >
+          <IconPerson size={22} color={c.text} />
+        </Pressable>
+      ),
+      headerRight: () => (
+        <View style={styles.navRight}>
+          <Pressable hitSlop={10} onPress={openConvert} accessibilityRole="button" accessibilityLabel="Currency calculator">
+            <SystemIcon ios="plus.forwardslash.minus" android="calculate" size={22} color={c.text} />
+          </Pressable>
+          <Pressable
+            hitSlop={10}
+            onPress={() => setBalanceHidden((h) => !h)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: balanceHidden }}
+            accessibilityLabel={balanceHidden ? 'Show balance' : 'Hide balance'}
+          >
+            <IconEye size={22} color={c.text} />
+          </Pressable>
+        </View>
+      ),
     });
-  };
-
-  const onScroll = (e: any) => {
-    if (balanceHidden) return; // disabled in particle view
-    const y = e.nativeEvent.contentOffset.y;
-    if (expandedRef.current) {
-      if (y > collapseSwipe) collapse(); // swipe back up → return to rest
-      return;
-    }
-    if (y < 0) {
-      expand.setValue(Math.min(1, -y / pullThreshold)); // elastic reveal
-      heroRecede.setValue(0);
-    } else {
-      expand.setValue(0);
-      heroRecede.setValue(Math.min(1, y / RECEDE)); // scroll up → hero recedes
-    }
-  };
-
-  const onScrollEndDrag = (e: any) => {
-    if (balanceHidden || expandedRef.current) return;
-    const y = e.nativeEvent.contentOffset.y;
-    if (y <= -pullThreshold) {
-      setExpandedBoth(true); // pop
-      Animated.spring(expand, { toValue: 1, useNativeDriver: false, speed: 12, bounciness: popBounce }).start();
-    } else {
-      Animated.spring(expand, { toValue: 0, useNativeDriver: false, speed: 16, bounciness: 0 }).start();
-    }
-  };
-
-  useEffect(() => {
-    if (balanceHidden && expanded) collapse(); // entering particle view collapses it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [balanceHidden]);
-
-  const contentTranslate = expand.interpolate({ inputRange: [0, 1], outputRange: [0, expandGap] });
-  const availableOpacity = expand.interpolate({ inputRange: [0.15, 0.7], outputRange: [0, 1], extrapolate: 'clamp' });
-  const linkHide = expand.interpolate({ inputRange: [0, 0.5], outputRange: [1, 0], extrapolate: 'clamp' });
-
-  // Expanded layout positions — no swap motion (the swap is a crossfade in place now).
-  const mainTranslateY = expand.interpolate({ inputRange: [0, 1], outputRange: [0, 6] });
-  const availableTranslateY = expand.interpolate({ inputRange: [0, 1], outputRange: [-6, 52] });
-  // Secondary stays small: rendered at 42pt, scaled DOWN to ~0.57 so it never upscales.
-  const availableScale = expand.interpolate({ inputRange: [0, 1], outputRange: [0.45, 0.57] });
-
-  const swapScale = swapFade.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }); // crossfade scale hint
-  // Hero recedes (scale down + fade) as the page scrolls up — never flies behind the header.
-  const heroOpacity = heroRecede.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
-  const heroScale = heroRecede.interpolate({ inputRange: [0, 1], outputRange: [1, 0.82] });
+  }, [navigation, dark, c, balanceHidden, openConvert]);
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
 
-      <View style={[styles.navbar, { paddingTop: insets.top + 8, backgroundColor: c.bg }]}>
-        <Squishy
-          scaleTo={0.88}
-          style={[styles.iconBtn, { backgroundColor: dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)' }]}
-          onPress={() => navigation.navigate('Settings')}
-          accessibilityRole="button"
-          accessibilityLabel="Profile and settings"
-        >
-          <IconPerson size={18} color={c.text} />
-        </Squishy>
-        <WULogo color={dark ? '#FFFFFF' : '#000000'} />
-        <Squishy
-          scaleTo={0.88}
-          style={[styles.iconBtn, { backgroundColor: dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)' }]}
-          onPress={() => setBalanceHidden((h) => !h)}
-          accessibilityRole="button"
-          accessibilityState={{ selected: balanceHidden }}
-          accessibilityLabel={balanceHidden ? 'Show balance' : 'Hide balance'}
-        >
-          <IconEye size={18} color={c.text} />
-        </Squishy>
-      </View>
-
       <ScrollView
-        ref={scrollRef}
         style={{ backgroundColor: c.bg }}
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-        onScroll={onScroll}
-        onScrollEndDrag={onScrollEndDrag}
       >
         {/* BALANCE HERO */}
         <View style={styles.hero}>
-          <Animated.View style={{ alignItems: 'center', opacity: heroOpacity, transform: [{ scale: heroScale }] }}>
-            <Animated.Text style={[styles.balanceLabel, { color: c.muted, opacity: Animated.multiply(labelOpacity, swapFade) }]}>{mainLabel}</Animated.Text>
-            <View style={styles.balanceWrap}>
-              <Animated.View style={{ opacity: swapFade, transform: [{ translateY: mainTranslateY }, { scale: swapScale }] }}>
-                <ParticleBalance
-                  amount={main.amount}
-                  currency={main.currency}
-                  hidden={balanceHidden}
-                  color={c.text}
-                  accent={WU_YELLOW}
-                />
-              </Animated.View>
-              {/* available balance — emerges on pull; tap to swap (crossfade in place) */}
-              <Animated.View
-                style={[styles.availableSlot, { opacity: Animated.multiply(availableOpacity, swapFade), transform: [{ translateY: availableTranslateY }] }]}
-                pointerEvents={expanded ? 'auto' : 'none'}
-              >
-                <Squishy
-                  scaleTo={0.96}
-                  onPress={startSwap}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Switch to ${otherLabel}`}
-                >
-                  <Text style={[styles.availLabel, { color: c.muted }]}>{otherLabel}</Text>
-                  {/* rendered at 42pt, scaled down — never upscaled, so it stays crisp */}
-                  <Animated.Text style={[styles.availAmount, { color: c.text, transform: [{ scale: Animated.multiply(availableScale, swapScale) }] }]}>
-                    {other.amount}
-                    <Text style={styles.availCurrency}> {other.currency}</Text>
-                  </Animated.Text>
-                </Squishy>
-              </Animated.View>
-            </View>
-          </Animated.View>
-          <Animated.View style={[styles.heroLinkSlot, { opacity: linkHide }]}>
+          <Animated.Text style={[styles.balanceLabel, { color: c.muted, opacity: labelOpacity }]}>{HOME.totalBalanceLabel}</Animated.Text>
+          <View style={styles.balanceWrap}>
+            <ParticleBalance
+              amount={totalBalance.amount}
+              currency={totalBalance.currency}
+              hidden={balanceHidden}
+              color={c.text}
+              accent={WU_YELLOW}
+            />
+          </View>
+          <View style={styles.heroLinkSlot}>
             {/* text link (balance shown) */}
             <Animated.View
               style={[styles.heroLinkLayer, { opacity: linkOpacity }]}
               pointerEvents={balanceHidden ? 'none' : 'auto'}
             >
               <TouchableOpacity accessibilityRole="button">
-                <Text style={[styles.viewAll, { color: c.accent }]}>View all accounts</Text>
+                <Text style={[styles.viewAll, { color: c.accent }]}>{HOME.viewAllAccounts}</Text>
               </TouchableOpacity>
             </Animated.View>
             {/* pill button (particles) — rises into the hero */}
@@ -320,19 +175,17 @@ function HomeScreen({ navigation }: any) {
               pointerEvents={balanceHidden ? 'auto' : 'none'}
             >
               <Squishy
-                scaleTo={0.94}
+                scaleTo={0.96}
                 style={[styles.viewPill, { backgroundColor: dark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.16)' }]}
                 accessibilityRole="button"
                 accessibilityLabel="View all accounts"
               >
-                <Text style={[styles.viewPillText, { color: c.text }]}>View all accounts</Text>
+                <Text style={[styles.viewPillText, { color: c.text }]}>{HOME.viewAllAccounts}</Text>
               </Squishy>
             </Animated.View>
-          </Animated.View>
+          </View>
         </View>
 
-        {/* Content below the hero — slides to the base of the screen on pop */}
-        <Animated.View style={{ transform: [{ translateY: contentTranslate }] }}>
         {/* CURRENCY CARDS */}
         <ScrollView
           horizontal
@@ -344,7 +197,7 @@ function HomeScreen({ navigation }: any) {
           snapToInterval={CARD_WIDTH + CARD_GAP}
           snapToAlignment="start"
         >
-          {ACCOUNTS.map((a, i) => (
+          {accounts.map((a, i) => (
             <Squishy
               key={i}
               scaleTo={0.97}
@@ -370,38 +223,22 @@ function HomeScreen({ navigation }: any) {
         {/* QUICK ACTIONS */}
         <View style={styles.actionsRow}>
           {QUICK_ACTIONS.map((action) => (
-            <Squishy
-              key={action.key}
-              scaleTo={0.9}
-              style={styles.actionBtn}
-              accessibilityRole="button"
-              accessibilityLabel={action.label}
-            >
-              <View style={styles.actionSquare}>
-                <SystemIcon
-                  ios={action.icon.ios}
-                  android={action.icon.android}
-                  size={24}
-                  color="#000000"
-                  weight="semibold"
-                />
-                <Text style={styles.actionLabel}>{action.label}</Text>
-              </View>
-            </Squishy>
+            <ActionButton key={action.key} icon={action.icon} label={action.label} />
           ))}
         </View>
 
-        {/* RECENT CONTACTS */}
-        <View style={{ marginBottom: 24 }}>
-          <View style={[styles.sectionHeader, { paddingHorizontal: 20 }]}>
-            <TouchableOpacity style={styles.sectionTitleRow} accessibilityRole="button">
-              <Text style={[styles.sectionTitle, { color: c.text }]}>Quick Actions</Text>
-              <IconChevronRight size={18} color={c.muted} strokeWidth={2} />
-            </TouchableOpacity>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.contactsRow, { paddingHorizontal: 20 }]}>
-            {CONTACTS.map((contact, i) => (
-              <Squishy key={i} scaleTo={0.96} style={[styles.contactCard, { backgroundColor: c.card, borderColor: c.border }]}>
+        {/* QUICK ACTIONS WIDGET */}
+        <WidgetCard c={c} title={HOME.sections.quickActions} onPressHeader={() => {}} style={styles.widget}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.widgetCarousel}
+            snapToInterval={CARD_WIDTH + CARD_GAP}
+            snapToAlignment="start"
+            decelerationRate="fast"
+          >
+            {contacts.map((contact, i) => (
+              <Squishy key={i} scaleTo={0.96} style={[styles.contactCard, { backgroundColor: c.pill, borderWidth: 0 }]}>
                 <View style={styles.cardInner}>
                   <View style={[styles.contactAvatar, { backgroundColor: contact.color }]}>
                     <Text style={[styles.avatarText, { color: contact.textColor }]}>{contact.initials}</Text>
@@ -415,74 +252,137 @@ function HomeScreen({ navigation }: any) {
               </Squishy>
             ))}
           </ScrollView>
-        </View>
+        </WidgetCard>
 
-        {/* RECENT TRANSACTIONS */}
-        <View style={[styles.section, { paddingHorizontal: 20 }]}>
-          <View style={styles.sectionHeader}>
-            <TouchableOpacity style={styles.sectionTitleRow} accessibilityRole="button">
-              <Text style={[styles.sectionTitle, { color: c.text }]}>Recent transactions</Text>
-              <IconChevronRight size={18} color={c.muted} strokeWidth={2} />
-            </TouchableOpacity>
-          </View>
-          <View style={[styles.txCard, { backgroundColor: c.card, borderColor: c.border }]}>
-            {TRANSACTIONS.slice(0, 5).map((tx: any, i: number) => (
-              <View key={i}>
-                <Squishy style={styles.txRow} scaleTo={0.97}>
-                  <View style={[styles.avatar, { backgroundColor: tx.color }]}>
-                    <Text style={[styles.avatarText, { color: tx.textColor }]}>{tx.initials}</Text>
-                  </View>
-                  <View style={styles.txMeta}>
-                    <Text style={[styles.txName, { color: c.text }]}>{tx.name}</Text>
-                    <Text style={[styles.txDate, { color: c.muted }]}>{tx.date}</Text>
-                  </View>
-                  <View style={styles.txAmounts}>
-                    <Text style={[styles.txAmount, { color: c.text }]}>{tx.amount}</Text>
-                    <Text style={[styles.txSub, { color: tx.subColor || c.muted }]}>{tx.sub}</Text>
-                  </View>
-                </Squishy>
-                {i < 4 && <View style={[styles.divider, { backgroundColor: c.border }]} />}
-              </View>
-            ))}
-          </View>
-        </View>
-        </Animated.View>
+        {/* RECENT TRANSACTIONS WIDGET */}
+        <WidgetCard c={c} title={HOME.sections.recentTransactions} onPressHeader={() => {}} style={styles.widget}>
+          {transactions.slice(0, 5).map((tx: any, i: number) => (
+            <View key={i}>
+              <Pressable style={styles.txRow}>
+                <View style={[styles.avatar, { backgroundColor: tx.color }]}>
+                  <Text style={[styles.avatarText, { color: tx.textColor }]}>{tx.initials}</Text>
+                </View>
+                <View style={styles.txMeta}>
+                  <Text style={[styles.txName, { color: c.text }]}>{tx.name}</Text>
+                  <Text style={[styles.txDate, { color: c.muted }]}>{tx.date}</Text>
+                </View>
+                <View style={styles.txAmounts}>
+                  <Text style={[styles.txAmount, { color: c.text }]}>{tx.amount}</Text>
+                  <Text style={[styles.txSub, { color: tx.subColor || c.muted }]}>{tx.sub}</Text>
+                </View>
+              </Pressable>
+              {i < transactions.slice(0, 5).length - 1 && (
+                <View style={[styles.divider, { backgroundColor: c.border, marginLeft: 72 }]} />
+              )}
+            </View>
+          ))}
+        </WidgetCard>
       </ScrollView>
     </View>
   );
 }
 
-function PaymentsScreen() {
-  const scheme = useColorScheme();
-  const c = scheme === 'dark' ? DARK : LIGHT;
+// Convert presented as a native iOS sheet (see the root stack's formSheet screen).
+function ConvertScreen() {
+  const dark = useColorScheme() === 'dark';
+  const c = dark ? DARK : LIGHT;
   return (
-    <View style={[styles.placeholder, { backgroundColor: c.bg }]}>
-      <Text style={[styles.placeholderText, { color: c.muted }]}>Payments</Text>
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <ConvertSheet c={c} />
     </View>
   );
 }
 
-function CardScreen() {
-  return <TweaksPanel />;
+const Tab = createNativeBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+const HomeStackNav = createNativeStackNavigator();
+const PaymentsStackNav = createNativeStackNavigator();
+const CardStackNav = createNativeStackNavigator();
+
+// Shared native-header chrome (background, tint, no hairline) driven by colour scheme.
+function useNavChrome() {
+  const dark = useColorScheme() === 'dark';
+  const c = dark ? DARK : LIGHT;
+  return {
+    headerStyle: { backgroundColor: c.bg },
+    headerShadowVisible: false,
+    headerTintColor: c.accent,
+    headerTitleStyle: { color: c.text },
+    headerLargeTitleStyle: { color: c.text },
+  };
 }
 
-const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
+// Each tab hosts its own native stack so every screen gets a real UINavigationBar.
+function HomeStack() {
+  return (
+    <HomeStackNav.Navigator screenOptions={useNavChrome()}>
+      <HomeStackNav.Screen name="HomeMain" component={HomeScreen} />
+    </HomeStackNav.Navigator>
+  );
+}
+
+function PaymentsStack() {
+  return (
+    <PaymentsStackNav.Navigator screenOptions={useNavChrome()}>
+      <PaymentsStackNav.Screen
+        name="PaymentsMain"
+        component={PaymentsScreen}
+        options={{ title: 'Payments', headerLargeTitle: false }}
+      />
+    </PaymentsStackNav.Navigator>
+  );
+}
+
+function CardStack() {
+  return (
+    <CardStackNav.Navigator screenOptions={useNavChrome()}>
+      <CardStackNav.Screen
+        name="CardMain"
+        component={CardScreen}
+        options={{ title: 'Cards', headerLargeTitle: false }}
+      />
+    </CardStackNav.Navigator>
+  );
+}
+
+// Native tab icons: SF Symbols on iOS, Material icon images on Android
+// (react-native-bottom-tabs takes an image source on Android, not SF names).
+function tabBarIconFor(sf: string, sfFocused: string, material: string): (props: { focused: boolean }) => any {
+  if (Platform.OS === 'ios') {
+    return ({ focused }: { focused: boolean }) => ({ sfSymbol: focused ? sfFocused : sf });
+  }
+  return () => MaterialIcon.getImageSourceSync(material, 26);
+}
 
 function TabNavigator() {
+  const dark = useColorScheme() === 'dark';
+  const c = dark ? DARK : LIGHT;
   return (
     <Tab.Navigator
-      tabBar={(props) => <GlassTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
+      tabBarActiveTintColor={c.accent}
+      tabBarInactiveTintColor={c.muted}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Payments" component={PaymentsScreen} />
-      <Tab.Screen name="Card" component={CardScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeStack}
+        options={{ title: 'Home', tabBarIcon: tabBarIconFor('house', 'house.fill', 'home') }}
+      />
+      <Tab.Screen
+        name="Payments"
+        component={PaymentsStack}
+        options={{ title: 'Payments', tabBarIcon: tabBarIconFor('arrow.left.arrow.right', 'arrow.left.arrow.right', 'swap-horiz') }}
+      />
+      <Tab.Screen
+        name="Card"
+        component={CardStack}
+        options={{ title: 'Card', tabBarIcon: tabBarIconFor('creditcard', 'creditcard.fill', 'credit-card') }}
+      />
     </Tab.Navigator>
   );
 }
 
 function RootNavigator() {
+  const chrome = useNavChrome();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Main" component={TabNavigator} />
@@ -490,9 +390,30 @@ function RootNavigator() {
         name="Settings"
         component={SettingsScreen}
         options={{
+          ...chrome,
+          headerShown: true,
+          title: SETTINGS.title,
+          headerLargeTitle: false,
           animation: 'slide_from_left',
           gestureEnabled: true,
+          fullScreenGestureEnabled: true,
         }}
+      />
+      <Stack.Screen
+        name="Convert"
+        component={ConvertScreen}
+        options={{
+          presentation: 'formSheet',
+          sheetAllowedDetents: [0.92],
+          sheetGrabberVisible: true,
+          sheetCornerRadius: 20,
+          gestureEnabled: true,
+        }}
+      />
+      <Stack.Screen
+        name="ComponentLibrary"
+        component={ComponentLibraryScreen}
+        options={{ ...chrome, headerShown: true, title: 'Component Library', headerLargeTitle: false }}
       />
     </Stack.Navigator>
   );
@@ -502,13 +423,19 @@ export default function App() {
   const scheme = useColorScheme();
   const dark = scheme === 'dark';
   return (
-    <SafeAreaProvider>
-      <TweaksProvider>
-        <NavigationContainer theme={dark ? DarkTheme : DefaultTheme}>
-          <RootNavigator />
-        </NavigationContainer>
-      </TweaksProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <TweaksProvider>
+          <PersonaProvider>
+            <DesignProvider>
+              <NavigationContainer theme={dark ? DarkTheme : DefaultTheme}>
+                <RootNavigator />
+              </NavigationContainer>
+            </DesignProvider>
+          </PersonaProvider>
+        </TweaksProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
@@ -527,6 +454,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  navRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  navLogo: { position: 'absolute', left: 0, right: 0, bottom: 12, alignItems: 'center', justifyContent: 'center' },
   scroll: { paddingBottom: 16 },
   hero: {
     alignItems: 'center',
@@ -536,15 +465,11 @@ const styles = StyleSheet.create({
   },
   balanceLabel: { fontSize: 15, marginBottom: 6 },
   balanceWrap: { marginBottom: 8 },
-  availableSlot: { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center' },
-  availLabel: { fontSize: 12, fontWeight: '500', textAlign: 'center', marginBottom: 2 },
-  availAmount: { fontSize: 42, fontWeight: '400', letterSpacing: -1, textAlign: 'center', fontFamily: 'PPRightGrotesk-WideMedium' },
-  availCurrency: { fontSize: 28, fontFamily: 'PPRightGrotesk-WideMedium' },
   heroLinkSlot: { height: 40, justifyContent: 'center', alignItems: 'center' },
   heroLinkLayer: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
-  viewAll: { fontSize: 15, fontWeight: '500' },
+  viewAll: { fontSize: 15, fontWeight: '400' },
   viewPill: { paddingVertical: 9, paddingHorizontal: 18, borderRadius: 999 },
-  viewPillText: { fontSize: 14, fontWeight: '600' },
+  viewPillText: { fontSize: 14, fontWeight: '400' },
   cardsScroll: { marginBottom: 28 },
   cardsRow: { paddingHorizontal: SCREEN_PAD, gap: CARD_GAP },
   currencyCard: {
@@ -610,6 +535,8 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 17, fontWeight: '600' },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   contactsRow: { gap: CARD_GAP },
+  widget: { marginHorizontal: 16, marginBottom: 16 },
+  widgetCarousel: { paddingLeft: 12, paddingRight: 12, paddingBottom: 16, gap: CARD_GAP },
   contactCard: {
     width: CARD_WIDTH,
     borderRadius: 16,
@@ -624,22 +551,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
   },
   avatarText: { fontSize: 15, fontWeight: '700' },
   contactName: { fontSize: 13 },
   contactAmount: { fontSize: 15, fontWeight: '600' },
   contactAction: { fontSize: 13, fontWeight: '500' },
   txCard: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
-  txRow: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12 },
+  txRow: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 8 },
   txMeta: { flex: 1 },
-  txName: { fontSize: 15, fontWeight: '500', marginBottom: 2 },
-  txDate: { fontSize: 13 },
+  txName: { fontSize: 15, fontWeight: '600', marginBottom: 2 },
+  txDate: { fontSize: 11 },
   txAmounts: { alignItems: 'flex-end' },
   txAmount: { fontSize: 15, fontWeight: '600', marginBottom: 2 },
   txSub: { fontSize: 13 },
@@ -654,7 +580,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   glassTab: {
-    borderRadius: 24,
+    borderRadius: 52,
     overflow: 'hidden',
     marginBottom: 8,
   },

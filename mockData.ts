@@ -96,9 +96,9 @@ export const CONTACTS = [
 // ─── TRANSACTIONS ─────────────────────────────────────────────────────────────
 export const TRANSACTIONS = [
   {
-    initials: 'MB',
-    name: 'Maria Bellegrito',
-    date: '24/05/2026 \u00b7 09:15AM \u00b7 Manila',
+    initials: 'JL',
+    name: 'Jessie Lai Lai',
+    date: '11/05/2026 \u00b7 09:15AM \u00b7 Manila',
     amount: '500.00 AUD',
     sub: '28,750.00 PHP',
     color: '#FFF0E8',
@@ -197,9 +197,9 @@ export type QuickAction = {
 };
 
 export const QUICK_ACTIONS: QuickAction[] = [
-  { key: 'send', label: 'Send', icon: { ios: 'arrow.up', android: 'arrow_upward' } },
-  { key: 'add', label: 'Add', icon: { ios: 'australiandollarsign.circle', android: 'add' } },
-  { key: 'cashout', label: 'Cash out', icon: { ios: 'arrow.down.to.line', android: 'arrow_downward' } },
+  { key: 'send', label: 'Send', icon: { ios: 'arrow.up', android: 'arrow-upward' } },
+  { key: 'add', label: 'Add', icon: { ios: 'australiandollarsign.circle', android: 'monetization-on' } },
+  { key: 'cashout', label: 'Cash out', icon: { ios: 'arrow.down.to.line', android: 'vertical-align-bottom' } },
   /*{ key: 'more', label: 'More', icon: { ios: 'ellipsis.circle', android: 'more-horiz' } } */
 ];
 
@@ -210,8 +210,161 @@ export const EXCHANGE_RATES = [
   { from: 'AUD', to: 'USD', rate: '0.653', trend: 'up' },
 ];
 
+// ─── CONVERT (swipe-down currency view) ──────────────────────────────────────
+export const CONVERT_MAIN = {
+  flag: '🇦🇺',
+  code: 'AUD',
+  name: 'Australian Dollar',
+  symbol: '$',
+  amount: '2,500.00',
+  sendTo: 'PHP',
+};
+
+export const CONVERSIONS = [
+  { flag: '🇵🇭', code: 'PHP', name: 'Philippine Peso', symbol: '₱', amount: '95,750.00', rate: '38.30' },
+  { flag: '🇯🇵', code: 'JPY', name: 'Japanese Yen', symbol: '¥', amount: '238,500', rate: '95.40' },
+  { flag: '🇺🇸', code: 'USD', name: 'US Dollar', symbol: '$', amount: '1,632.50', rate: '0.653' },
+  { flag: '🇪🇺', code: 'EUR', name: 'Euro', symbol: '€', amount: '1,525.00', rate: '0.610' },
+  { flag: '🇬🇧', code: 'GBP', name: 'British Pound', symbol: '£', amount: '1,300.00', rate: '0.520' },
+];
+
 // ─── SETTINGS ────────────────────────────────────────────────────────────────
 export const SETTINGS = {
   appVersion: '1.0.0',
   copyright: '2026 Western Union Holdings, Inc. All Rights Reserved',
+  title: 'Profile & settings',
+  sections: { moreServices: 'More services', legal: 'Legal and support', needHelp: 'Need help?' },
+  componentLibrary: 'Component library',
+  logout: 'Log out',
+};
+
+// ─── HOME SCREEN COPY ────────────────────────────────────────────────────────
+export const HOME = {
+  totalBalanceLabel: 'Total balance',
+  viewAllAccounts: 'View all accounts',
+  sections: { quickActions: 'Quick Actions', recentTransactions: 'Recent transactions' },
+};
+
+// Placeholder copy for tabs not yet built.
+export const PLACEHOLDERS = {};
+
+// ─── PAYMENTS SCREEN ─────────────────────────────────────────────────────────
+export const PAYMENTS_SECTIONS = { contacts: 'Contacts', upcoming: 'Upcoming', recent: 'Recent payments' };
+
+export const PAYMENTS_CONTACTS = [
+  { name: 'Elias', initials: 'EG', color: '#E8F4FF', textColor: '#1A6FD4', flag: '🇨🇦' },
+  { name: 'Alex', initials: 'AW', color: '#FFE8E8', textColor: '#C4321A', flag: '🇺🇸' },
+  { name: 'Aurora', initials: 'AH', color: '#E8F9F0', textColor: '#1A8A4A', flag: '🇯🇵' },
+  { name: 'Juan', initials: 'JC', color: '#FFF6E8', textColor: '#C4801A', flag: '🇵🇭' },
+  { name: 'Chandra', initials: 'CP', color: '#F0E8FF', textColor: '#6B1AC4', flag: '🇮🇳' },
+];
+
+export const PAYMENTS_ACTIONS = [
+  { key: 'send', label: 'Send', icon: { ios: 'arrow.up', android: 'arrow-upward' } },
+  { key: 'request', label: 'Request', icon: { ios: 'arrow.down', android: 'arrow-downward' } },
+  { key: 'paybill', label: 'Pay bill', icon: { ios: 'doc.text', android: 'receipt-long' } },
+  { key: 'track', label: 'Track', icon: { ios: 'dot.radiowaves.left.and.right', android: 'track-changes' } },
+];
+
+// Upcoming payments carousel (grey inner cards inside the widget).
+export const PAYMENTS_UPCOMING = [
+  { initials: 'AH', color: '#FF7A45', textColor: '#FFFFFF', amount: '350.32', currency: 'AUD', desc: 'Repayment · 2 May 2026' },
+  { initials: 'AH', color: '#C9F1E8', textColor: '#048F6E', amount: '50,000.00', currency: 'JPY', desc: 'To Aurora · 16 April 2026' },
+];
+
+// Recent payments list. Either a status (dot + label) OR an action link.
+export const PAYMENTS_RECENT = [
+  { name: 'Elias Gonzales', date: '4 April 2026, 7:55pm', initials: 'EG', color: '#E8F4FF', textColor: '#1A6FD4', amount: '250.00 CAD', status: 'Incomplete', statusType: 'warning' as const },
+  { name: 'Juan Dela Cruz', date: '6 April 2026, 10:45am', initials: 'JC', color: '#FFF6E8', textColor: '#C4801A', amount: '300.00 PHP', status: 'In progress', statusType: 'info' as const },
+  { name: 'Elias Gonzales', date: '22 March 2026, 7:55pm', initials: 'EG', color: '#E8F4FF', textColor: '#1A6FD4', amount: '250.00 CAD', action: 'Resend' },
+  { name: 'Aurora Howard', date: '3 March, 8:22am', initials: 'AH', color: '#E8F9F0', textColor: '#1A8A4A', amount: '50,000.00 JPY', action: 'Resend' },
+  { name: 'Alex Whiteman', date: '2 February 2026, 1:55pm', initials: 'AW', color: '#FFE8E8', textColor: '#C4321A', amount: '+150.00 USD', action: 'Request', positive: true },
+];
+
+// ─── CONVERT SHEET COPY ──────────────────────────────────────────────────────
+export const CONVERT = {
+  title: 'Convert',
+  // {code}/{to} are interpolated from CONVERT_MAIN.
+  sendTemplate: 'Send {code} to {to}',
+  viewQuote: 'View Quote',
+  addCurrency: 'Add another currency',
+};
+
+// ─── CARDS PAGE ──────────────────────────────────────────────────────────────
+export const CARD = {
+  last4: '0795',
+  network: 'VISA',
+  holder: 'Sam Bellegrito',
+  currency: 'AUD',
+  // Back-of-card details (revealed on flip / "Show details").
+  number: '4012 8888 8888 0795',
+  expiry: '08/29',
+  cvv: '321',
+  labels: { number: 'Card number', holder: 'Card holder', expiry: 'Expires', cvv: 'CVV' },
+};
+
+// Top-row card actions (standalone yellow buttons).
+export const CARD_ACTIONS = [
+  { key: 'details', label: 'Show details', icon: { ios: 'eye', android: 'visibility' } },
+  { key: 'freeze', label: 'Freeze card', icon: { ios: 'snowflake', android: 'ac-unit' } },
+  { key: 'controls', label: 'Controls', icon: { ios: 'slider.horizontal.3', android: 'tune' } },
+];
+
+// Recent card spends (list items). NOTE: the second row in Figma shows a green
+// logo (Woolworths) under "Uniqlo" copy — interpreted as Woolworths here.
+export const CARD_SPENDS = [
+  {
+    merchant: 'Uniqlo',
+    date: '4 April 2026, 7:55pm',
+    amount: '- 32.00 AUD',
+    status: 'Pending',
+    statusType: 'warning' as const,
+    initials: 'UN',
+    color: '#E60012',
+    textColor: '#FFFFFF',
+  },
+  {
+    merchant: 'Woolworths',
+    date: '4 April 2026, 7:55pm',
+    amount: '- 300.56 AUD',
+    status: 'In progress',
+    statusType: 'info' as const,
+    initials: 'W',
+    color: '#178841',
+    textColor: '#FFFFFF',
+  },
+];
+
+// Insights — monthly spend curve (values normalised 0–1; rendered as an SVG line).
+export const CARD_INSIGHTS = {
+  period: 'Spent this April',
+  amount: '450.00 AUD',
+  delta: '$100.00',
+  deltaUp: true,
+  thisMonth: [0.04, 0.07, 0.1, 0.13, 0.18, 0.21, 0.25, 0.31, 0.35, 0.4, 0.46, 0.52, 0.56, 0.63, 0.72, 0.8, 0.85, 0.9, 0.96, 1.0],
+  lastMonth: [0.03, 0.05, 0.08, 0.1, 0.12, 0.15, 0.17, 0.2, 0.22, 0.25, 0.28, 0.3, 0.33, 0.35, 0.38, 0.41, 0.44, 0.47, 0.5, 0.53],
+  axis: ['1', '6', '11', '16', '21', '30'],
+};
+
+// Card settings (list items with native icons).
+export const CARD_SETTINGS = [
+  { label: 'Travel Mode', icon: { ios: 'globe', android: 'public' } },
+  { label: 'Setup Apple Pay', icon: { ios: 'apple.logo', android: 'account-balance-wallet' } },
+  { label: 'Change Card PIN', icon: { ios: 'circle.grid.3x3.fill', android: 'dialpad' } },
+  { label: 'Report card as lost or stolen', icon: { ios: 'creditcard.trianglebadge.exclamationmark', android: 'credit-card' } },
+  { label: 'Dispute Transaction', icon: { ios: 'questionmark.circle', android: 'help-outline' } },
+];
+
+// Apple Pay setup banner copy.
+export const CARD_APPLE_PAY = {
+  badge: 'Pay',
+  title: 'Setup Apple Pay',
+  subtitle: 'Take your card with you and pay in local currency.',
+};
+
+// Section header titles for the Cards page.
+export const CARD_SECTIONS = {
+  spends: 'Recent Spends',
+  insights: 'Insights',
+  settings: 'Settings',
 };

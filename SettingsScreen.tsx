@@ -5,19 +5,16 @@ import {
   ScrollView,
   StyleSheet,
   useColorScheme,
+  Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import {
-  IconPerson, IconLock, IconPeople, IconCreditCard,
-  IconDoc, IconChart, IconBell, IconBuilding, IconMobile,
-  IconList, IconGift, IconMessage, IconPhone, IconLocation,
-  IconChevronRight, IconHelp,
-} from './Icons';
-import { USER, SETTINGS } from './mockData';
+import { SETTINGS } from './mockData';
 import { Squishy } from './Squishy';
+import { SystemIcon } from './SystemIcon';
+import { WU_YELLOW } from './theme';
+import { usePersona, PERSONAS } from './PersonaContext';
 
-const WU_YELLOW = '#F5A623';
+type IconSpec = { ios: string; android: string };
 
 const LIGHT = {
   bg: '#F2F2F7',
@@ -39,120 +36,141 @@ const DARK = {
   pill: '#2C2C2E',
 };
 
-const SETTINGS_ITEMS = [
-  { label: 'Profile', Icon: IconPerson },
-  { label: 'Security', Icon: IconLock },
-  { label: 'Manage contacts', Icon: IconPeople },
-  { label: 'Payment settings', Icon: IconCreditCard },
-  { label: 'Statements', Icon: IconDoc },
-  { label: 'Exchange rate alerts', Icon: IconChart },
-  { label: 'Marketing preferences', Icon: IconBell },
+const SETTINGS_ITEMS: { label: string; icon: IconSpec }[] = [
+  { label: 'Profile', icon: { ios: 'person.crop.circle', android: 'person' } },
+  { label: 'Security', icon: { ios: 'lock.fill', android: 'lock' } },
+  { label: 'Manage contacts', icon: { ios: 'person.2.fill', android: 'group' } },
+  { label: 'Payment settings', icon: { ios: 'creditcard.fill', android: 'credit-card' } },
+  { label: 'Statements', icon: { ios: 'doc.text.fill', android: 'description' } },
+  { label: 'Exchange rate alerts', icon: { ios: 'chart.line.uptrend.xyaxis', android: 'show-chart' } },
+  { label: 'Marketing preferences', icon: { ios: 'bell.fill', android: 'notifications' } },
 ];
 
-const MORE_SERVICES = [
-  { label: 'Get loan', Icon: IconBuilding },
-  { label: 'Mobile', Icon: IconMobile },
-  { label: 'Pay bills', Icon: IconList },
-  { label: 'Gifts', Icon: IconGift },
+const MORE_SERVICES: { label: string; icon: IconSpec }[] = [
+  { label: 'Get loan', icon: { ios: 'building.columns.fill', android: 'account-balance' } },
+  { label: 'Mobile', icon: { ios: 'iphone', android: 'smartphone' } },
+  { label: 'Pay bills', icon: { ios: 'list.bullet.rectangle.fill', android: 'receipt-long' } },
+  { label: 'Gifts', icon: { ios: 'gift.fill', android: 'card-giftcard' } },
 ];
 
-export function SettingsScreen() {
+export function SettingsScreen({ navigation }: any) {
   const scheme = useColorScheme();
   const dark = scheme === 'dark';
   const c = dark ? DARK : LIGHT;
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const { persona, setPersona } = usePersona();
+  const user = persona.user;
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <View style={[styles.nav, { paddingTop: insets.top + 8, backgroundColor: c.bg }]}>
-        <Squishy
-          onPress={() => navigation.goBack()}
-          style={[styles.backBtn, { backgroundColor: c.pill }]}
-          accessibilityRole="button"
-          accessibilityLabel="Close settings"
-        >
-          <Text style={[styles.backLabel, { color: c.accent }]}>Done</Text>
-        </Squishy>
-        <Text style={[styles.navTitle, { color: c.text }]}>Profile & settings</Text>
-        <View style={styles.backBtn} />
-      </View>
-
       <ScrollView
         showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
       >
         <View style={[styles.userHeader, { backgroundColor: c.card, borderColor: c.border }]}>
           <View style={[styles.userAvatar, { backgroundColor: WU_YELLOW }]}>
-            <Text style={styles.userAvatarText}>{USER.initials}</Text>
+            <Text style={styles.userAvatarText}>{user.initials}</Text>
           </View>
           <View>
-            <Text style={[styles.userName, { color: c.text }]}>{USER.firstName} {USER.lastName}</Text>
-            <Text style={[styles.userLocation, { color: c.muted }]}>{USER.location}</Text>
+            <Text style={[styles.userName, { color: c.text }]}>{user.firstName} {user.lastName}</Text>
+            <Text style={[styles.userLocation, { color: c.muted }]}>{user.location}</Text>
           </View>
         </View>
 
         <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
+          <Pressable style={styles.row} onPress={() => navigation.navigate('ComponentLibrary')}>
+            <View style={[styles.iconWrap, { backgroundColor: c.pill }]}>
+              <SystemIcon ios="square.on.square" android="dashboard-customize" size={20} color={c.muted} />
+            </View>
+            <Text style={[styles.rowLabel, { color: c.text }]}>{SETTINGS.componentLibrary}</Text>
+            <SystemIcon ios="chevron.right" android="chevron-right" size={14} color={c.muted} />
+          </Pressable>
+        </View>
+
+        <Text style={[styles.heading, { color: c.text }]}>Scenario</Text>
+        <View style={styles.personaRow}>
+          {PERSONAS.map((p) => {
+            const active = p.id === persona.id;
+            return (
+              <Pressable
+                key={p.id}
+                onPress={() => setPersona(p.id)}
+                style={[styles.personaChip, { backgroundColor: active ? WU_YELLOW : c.card, borderColor: active ? WU_YELLOW : c.border }]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+              >
+                <Text style={[styles.personaLabel, { color: active ? '#000000' : c.text }]}>{p.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Text style={[styles.personaBlurb, { color: c.muted }]}>{persona.blurb}</Text>
+
+        <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
           {SETTINGS_ITEMS.map((item, i) => (
             <View key={i}>
-              <Squishy style={styles.row}>
+              <Pressable style={styles.row}>
                 <View style={[styles.iconWrap, { backgroundColor: c.pill }]}>
-                  <item.Icon size={18} color={c.muted} />
+                  <SystemIcon ios={item.icon.ios} android={item.icon.android} size={20} color={c.muted} />
                 </View>
                 <Text style={[styles.rowLabel, { color: c.text }]}>{item.label}</Text>
-                <IconChevronRight size={16} color={c.muted} strokeWidth={2} />
-              </Squishy>
+                <SystemIcon ios="chevron.right" android="chevron-right" size={14} color={c.muted} />
+              </Pressable>
               {i < SETTINGS_ITEMS.length - 1 && (
-                <View style={[styles.divider, { backgroundColor: c.border, marginLeft: 56 }]} />
+                <View style={[styles.divider, { backgroundColor: c.border, marginLeft: 64 }]} />
               )}
             </View>
           ))}
         </View>
 
-        <Text style={[styles.heading, { color: c.text }]}>More services</Text>
+        <Text style={[styles.heading, { color: c.text }]}>{SETTINGS.sections.moreServices}</Text>
         <View style={styles.moreRow}>
           {MORE_SERVICES.map((item, i) => (
             <Squishy key={i} style={[styles.moreItem, { backgroundColor: c.card, borderColor: c.border }]}>
               <View style={[styles.moreIcon, { backgroundColor: c.pill }]}>
-                <item.Icon size={22} color={c.text} />
+                <SystemIcon ios={item.icon.ios} android={item.icon.android} size={22} color={c.text} />
               </View>
               <Text style={[styles.moreLabel, { color: c.text }]}>{item.label}</Text>
             </Squishy>
           ))}
         </View>
 
-        <Text style={[styles.heading, { color: c.text }]}>Legal and support</Text>
+        <Text style={[styles.heading, { color: c.text }]}>{SETTINGS.sections.legal}</Text>
         <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
-          {[{ label: 'Legal notices', Icon: IconDoc }, { label: 'Get help', Icon: IconHelp }].map((item, i) => (
+          {[
+            { label: 'Legal notices', icon: { ios: 'doc.text.fill', android: 'description' } },
+            { label: 'Get help', icon: { ios: 'questionmark.circle.fill', android: 'help-outline' } },
+          ].map((item, i) => (
             <View key={i}>
-              <Squishy style={styles.row}>
+              <Pressable style={styles.row}>
                 <View style={[styles.iconWrap, { backgroundColor: c.pill }]}>
-                  <item.Icon size={18} color={c.muted} />
+                  <SystemIcon ios={item.icon.ios} android={item.icon.android} size={20} color={c.muted} />
                 </View>
                 <Text style={[styles.rowLabel, { color: c.text }]}>{item.label}</Text>
-                <IconChevronRight size={16} color={c.muted} strokeWidth={2} />
-              </Squishy>
-              {i === 0 && <View style={[styles.divider, { backgroundColor: c.border, marginLeft: 56 }]} />}
+                <SystemIcon ios="chevron.right" android="chevron-right" size={14} color={c.muted} />
+              </Pressable>
+              {i === 0 && <View style={[styles.divider, { backgroundColor: c.border, marginLeft: 64 }]} />}
             </View>
           ))}
         </View>
 
-        <Text style={[styles.heading, { color: c.text }]}>Need help?</Text>
+        <Text style={[styles.heading, { color: c.text }]}>{SETTINGS.sections.needHelp}</Text>
         <View style={styles.helpRow}>
           {[
-            { label: 'Message us', Icon: IconMessage },
-            { label: 'Call us', Icon: IconPhone },
-            { label: 'Locations', Icon: IconLocation },
+            { label: 'Message us', icon: { ios: 'message.fill', android: 'chat-bubble' } },
+            { label: 'Call us', icon: { ios: 'phone.fill', android: 'call' } },
+            { label: 'Locations', icon: { ios: 'mappin.and.ellipse', android: 'location-on' } },
           ].map((item, i) => (
             <Squishy key={i} style={[styles.helpBtn, { backgroundColor: WU_YELLOW }]}>
-              <item.Icon size={22} color="#000000" />
+              <SystemIcon ios={item.icon.ios} android={item.icon.android} size={22} color="#000000" />
               <Text style={styles.helpLabel}>{item.label}</Text>
             </Squishy>
           ))}
         </View>
 
         <Squishy style={[styles.logoutBtn, { borderColor: c.border }]}>
-          <Text style={[styles.logoutLabel, { color: c.text }]}>Log out</Text>
+          <Text style={[styles.logoutLabel, { color: c.text }]}>{SETTINGS.logout}</Text>
         </Squishy>
 
         <Text style={[styles.copyright, { color: c.muted }]}>
@@ -211,19 +229,24 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 8,
   },
   iconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  rowLabel: { flex: 1, fontSize: 16 },
+  rowLabel: { flex: 1, fontSize: 15, fontWeight: '600' },
   divider: { height: StyleSheet.hairlineWidth },
   heading: { fontSize: 20, fontWeight: '600', paddingHorizontal: 20, marginBottom: 12 },
+  personaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 20 },
+  personaChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth },
+  personaLabel: { fontSize: 14, fontWeight: '600' },
+  personaBlurb: { fontSize: 13, paddingHorizontal: 20, marginTop: 10, marginBottom: 8, lineHeight: 18 },
   moreRow: {
     flexDirection: 'row',
     paddingHorizontal: 20,

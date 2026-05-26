@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
+import { WU_YELLOW } from './theme';
 
 // Live-tunable knobs for the particle balance + tilt physics. Defaults match the
 // values the component shipped with.
@@ -26,31 +27,26 @@ export type Tweaks = {
   accentColor: string;
   baseColor: string;        // '' = use the theme text colour
   accentRatio: number;      // 0..1 share of accent-coloured particles
-  // Pull-to-reveal & swap
-  pullThreshold: number;    // px of pull needed to pop
-  expandGap: number;        // px the content slides down on pop
-  popBounce: number;        // bounciness of the pop spring
-  collapseSwipe: number;    // px of upward swipe needed to collapse (higher = less sensitive)
-  swapMs: number;           // swap animation duration
+  // Convert sheet
+  pullThreshold: number;    // px of pull-down at the top before the Convert sheet opens
 };
 
-const WU_YELLOW = '#F5A623';
-
+// Baked-in particle settings (tuned on device — the tweaks panel has been pruned).
 export const DEFAULT_TWEAKS: Tweaks = {
-  maxOffset: 48,
+  maxOffset: 100,
   smooth: 0.2,
   signX: 1,
   signY: -1,
   springSpeed: 12,
   springBounciness: 6,
   count: 72,
-  scatter: 240,
-  driftAmount: 1,
-  driftSpeed: 1,
-  glow: 1,
-  sizeMin: 2,
-  sizeMax: 7,
-  sizeJitter: 0.4,
+  scatter: 300,
+  driftAmount: 2.5,
+  driftSpeed: 0.3,
+  glow: 0,
+  sizeMin: 1,
+  sizeMax: 3,
+  sizeJitter: 0.52,
   blurNoise: 0.4,
   dissolveMs: 850,
   reformMs: 600,
@@ -58,10 +54,6 @@ export const DEFAULT_TWEAKS: Tweaks = {
   baseColor: '',
   accentRatio: 0.22,
   pullThreshold: 110,
-  expandGap: 120,
-  popBounce: 16,
-  collapseSwipe: 80,
-  swapMs: 420,
 };
 
 type TweaksContextValue = {
