@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,9 +11,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SETTINGS } from './mockData';
 import { Squishy } from './Squishy';
 import { SystemIcon } from './SystemIcon';
-import { NavButtonGroup } from './components/ui';
 import { WU_YELLOW } from './theme';
-import { usePersona, PERSONAS } from './PersonaContext';
+import { usePersona } from './PersonaContext';
 
 type IconSpec = { ios: string; android: string };
 
@@ -47,6 +46,11 @@ const SETTINGS_ITEMS: { label: string; icon: IconSpec }[] = [
   { label: 'Marketing preferences', icon: { ios: 'bell.fill', android: 'notifications' } },
 ];
 
+const LEGAL_ITEMS: { label: string; icon: IconSpec }[] = [
+  { label: 'Legal notices', icon: { ios: 'doc.text.fill', android: 'description' } },
+  { label: 'Get help', icon: { ios: 'questionmark.circle.fill', android: 'help-outline' } },
+];
+
 const MORE_SERVICES: { label: string; icon: IconSpec }[] = [
   { label: 'Get loan', icon: { ios: 'building.columns.fill', android: 'account-balance' } },
   { label: 'Mobile', icon: { ios: 'iphone', android: 'smartphone' } },
@@ -54,35 +58,45 @@ const MORE_SERVICES: { label: string; icon: IconSpec }[] = [
   { label: 'Gifts', icon: { ios: 'gift.fill', android: 'card-giftcard' } },
 ];
 
+const HELP_ITEMS: { label: string; icon: IconSpec }[] = [
+  { label: 'Message us', icon: { ios: 'message.fill', android: 'chat-bubble' } },
+  { label: 'Call us', icon: { ios: 'phone.fill', android: 'call' } },
+  { label: 'Locations', icon: { ios: 'mappin.and.ellipse', android: 'location-on' } },
+];
+
+// Flat menu row — icon + label only. No bounding box, no separator, no chevron.
+function MenuRow({
+  c, icon, label, onPress,
+}: { c: typeof LIGHT; icon: IconSpec; label: string; onPress?: () => void }) {
+  return (
+    <Pressable
+      style={styles.menuRow}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <SystemIcon ios={icon.ios} android={icon.android} size={22} color={c.text} />
+      <Text style={[styles.menuLabel, { color: c.text }]}>{label}</Text>
+    </Pressable>
+  );
+}
+
 export function SettingsScreen({ navigation }: any) {
   const scheme = useColorScheme();
   const dark = scheme === 'dark';
   const c = dark ? DARK : LIGHT;
   const insets = useSafeAreaInsets();
-  const { persona, setPersona } = usePersona();
+  const { persona } = usePersona();
   const user = persona.user;
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerBackVisible: false,
-      headerLeft: () => (
-        <NavButtonGroup
-          items={[
-            { key: 'close', label: 'Close settings', onPress: () => navigation.goBack(), render: (col) => <SystemIcon ios="xmark" android="close" size={18} color={col} /> },
-          ]}
-        />
-      ),
-    });
-  }, [navigation]);
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+        contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: insets.bottom + 40 }}
       >
-        <View style={[styles.userHeader, { backgroundColor: c.card, borderColor: c.border }]}>
+        {/* Profile summary — flat, no box */}
+        <View style={styles.userHeader}>
           <View style={[styles.userAvatar, { backgroundColor: WU_YELLOW }]}>
             <Text style={styles.userAvatarText}>{user.initials}</Text>
           </View>
@@ -92,90 +106,36 @@ export function SettingsScreen({ navigation }: any) {
           </View>
         </View>
 
-        <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
-          <Pressable style={styles.row} onPress={() => navigation.navigate('ComponentLibrary')}>
-            <View style={[styles.iconWrap, { backgroundColor: c.pill }]}>
-              <SystemIcon ios="square.on.square" android="dashboard-customize" size={20} color={c.muted} />
-            </View>
-            <Text style={[styles.rowLabel, { color: c.text }]}>{SETTINGS.componentLibrary}</Text>
-            <SystemIcon ios="chevron.right" android="chevron-right" size={14} color={c.muted} />
-          </Pressable>
-        </View>
-
-        <Text style={[styles.heading, { color: c.text }]}>Scenario</Text>
-        <View style={styles.personaRow}>
-          {PERSONAS.map((p) => {
-            const active = p.id === persona.id;
-            return (
-              <Pressable
-                key={p.id}
-                onPress={() => setPersona(p.id)}
-                style={[styles.personaChip, { backgroundColor: active ? WU_YELLOW : c.card, borderColor: active ? WU_YELLOW : c.border }]}
-                accessibilityRole="button"
-                accessibilityState={{ selected: active }}
-              >
-                <Text style={[styles.personaLabel, { color: active ? '#000000' : c.text }]}>{p.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        <Text style={[styles.personaBlurb, { color: c.muted }]}>{persona.blurb}</Text>
-
-        <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
-          {SETTINGS_ITEMS.map((item, i) => (
-            <View key={i}>
-              <Pressable style={styles.row}>
-                <View style={[styles.iconWrap, { backgroundColor: c.pill }]}>
-                  <SystemIcon ios={item.icon.ios} android={item.icon.android} size={20} color={c.muted} />
-                </View>
-                <Text style={[styles.rowLabel, { color: c.text }]}>{item.label}</Text>
-                <SystemIcon ios="chevron.right" android="chevron-right" size={14} color={c.muted} />
-              </Pressable>
-              {i < SETTINGS_ITEMS.length - 1 && (
-                <View style={[styles.divider, { backgroundColor: c.border, marginLeft: 64 }]} />
-              )}
-            </View>
-          ))}
-        </View>
+        {/* Menu — icon + label rows only. App settings leads to the design/demo
+            screen, which now also hosts the Scenario switcher. */}
+        <MenuRow
+          c={c}
+          icon={{ ios: 'slider.horizontal.3', android: 'tune' }}
+          label={SETTINGS.appSettings}
+          onPress={() => navigation.navigate('AppSettings')}
+        />
+        {SETTINGS_ITEMS.map((item) => (
+          <MenuRow key={item.label} c={c} icon={item.icon} label={item.label} />
+        ))}
 
         <Text style={[styles.heading, { color: c.text }]}>{SETTINGS.sections.moreServices}</Text>
         <View style={styles.moreRow}>
           {MORE_SERVICES.map((item, i) => (
             <Squishy key={i} style={[styles.moreItem, { backgroundColor: c.card, borderColor: c.border }]}>
-              <View style={[styles.moreIcon, { backgroundColor: c.pill }]}>
-                <SystemIcon ios={item.icon.ios} android={item.icon.android} size={22} color={c.text} />
-              </View>
+              <SystemIcon ios={item.icon.ios} android={item.icon.android} size={24} color={c.text} />
               <Text style={[styles.moreLabel, { color: c.text }]}>{item.label}</Text>
             </Squishy>
           ))}
         </View>
 
         <Text style={[styles.heading, { color: c.text }]}>{SETTINGS.sections.legal}</Text>
-        <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
-          {[
-            { label: 'Legal notices', icon: { ios: 'doc.text.fill', android: 'description' } },
-            { label: 'Get help', icon: { ios: 'questionmark.circle.fill', android: 'help-outline' } },
-          ].map((item, i) => (
-            <View key={i}>
-              <Pressable style={styles.row}>
-                <View style={[styles.iconWrap, { backgroundColor: c.pill }]}>
-                  <SystemIcon ios={item.icon.ios} android={item.icon.android} size={20} color={c.muted} />
-                </View>
-                <Text style={[styles.rowLabel, { color: c.text }]}>{item.label}</Text>
-                <SystemIcon ios="chevron.right" android="chevron-right" size={14} color={c.muted} />
-              </Pressable>
-              {i === 0 && <View style={[styles.divider, { backgroundColor: c.border, marginLeft: 64 }]} />}
-            </View>
-          ))}
-        </View>
+        {LEGAL_ITEMS.map((item) => (
+          <MenuRow key={item.label} c={c} icon={item.icon} label={item.label} />
+        ))}
 
         <Text style={[styles.heading, { color: c.text }]}>{SETTINGS.sections.needHelp}</Text>
         <View style={styles.helpRow}>
-          {[
-            { label: 'Message us', icon: { ios: 'message.fill', android: 'chat-bubble' } },
-            { label: 'Call us', icon: { ios: 'phone.fill', android: 'call' } },
-            { label: 'Locations', icon: { ios: 'mappin.and.ellipse', android: 'location-on' } },
-          ].map((item, i) => (
+          {HELP_ITEMS.map((item, i) => (
             <Squishy key={i} style={[styles.helpBtn, { backgroundColor: WU_YELLOW }]}>
               <SystemIcon ios={item.icon.ios} android={item.icon.android} size={22} color="#000000" />
               <Text style={styles.helpLabel}>{item.label}</Text>
@@ -188,7 +148,7 @@ export function SettingsScreen({ navigation }: any) {
         </Squishy>
 
         <Text style={[styles.copyright, { color: c.muted }]}>
-          {'\u00a9'} {SETTINGS.copyright}{'\n'}App version {SETTINGS.appVersion}
+          {'©'} {SETTINGS.copyright}{'\n'}App version {SETTINGS.appVersion}
         </Text>
       </ScrollView>
     </View>
@@ -196,32 +156,12 @@ export function SettingsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  nav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingBottom: 12,
-  },
-  navTitle: { fontSize: 17, fontWeight: '600' },
-  backBtn: {
-    minWidth: 60,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  backLabel: { fontSize: 17, fontWeight: '400' },
   userHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    marginHorizontal: 20,
-    marginBottom: 24,
-    marginTop: 8,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   userAvatar: {
     width: 48,
@@ -233,39 +173,20 @@ const styles = StyleSheet.create({
   userAvatarText: { fontSize: 18, fontWeight: '700', color: '#000000' },
   userName: { fontSize: 16, fontWeight: '600', marginBottom: 2 },
   userLocation: { fontSize: 13 },
-  card: {
-    marginHorizontal: 20,
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: 'hidden',
-    marginBottom: 32,
-  },
-  row: {
+  menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    gap: 8,
+    gap: 16,
+    paddingVertical: 13,
+    paddingHorizontal: 20,
   },
-  iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  rowLabel: { flex: 1, fontSize: 15, fontWeight: '600' },
-  divider: { height: StyleSheet.hairlineWidth },
-  heading: { fontSize: 20, fontWeight: '600', paddingHorizontal: 20, marginBottom: 12 },
-  personaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 20 },
-  personaChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth },
-  personaLabel: { fontSize: 14, fontWeight: '600' },
-  personaBlurb: { fontSize: 13, paddingHorizontal: 20, marginTop: 10, marginBottom: 8, lineHeight: 18 },
+  menuLabel: { fontSize: 16, fontWeight: '500' },
+  heading: { fontSize: 20, fontWeight: '600', paddingHorizontal: 20, marginTop: 16, marginBottom: 12 },
   moreRow: {
     flexDirection: 'row',
     paddingHorizontal: 20,
     gap: 12,
-    marginBottom: 32,
+    marginBottom: 16,
   },
   moreItem: {
     flex: 1,
@@ -275,19 +196,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  moreIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   moreLabel: { fontSize: 12, fontWeight: '500', textAlign: 'center' },
   helpRow: {
     flexDirection: 'row',
     paddingHorizontal: 20,
     gap: 12,
-    marginBottom: 32,
+    marginBottom: 24,
   },
   helpBtn: {
     flex: 1,

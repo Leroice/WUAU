@@ -13,6 +13,7 @@ export type Theme = {
   muted: string;
   accent: string;
   border: string;
+  divider: string; // stronger hairline for in-list separators (Figma #BFBFBF)
   pill: string;
   // semantic / status
   warning: string; // "Pending"
@@ -32,6 +33,7 @@ export const LIGHT: Theme = {
   muted: '#6E6E6E',
   accent: '#1A6FD4',
   border: '#E2E8F0',
+  divider: '#C6C6C8',
   pill: '#F1F5F9',
   warning: '#EA7E00',
   info: '#239AF6',
@@ -47,6 +49,7 @@ export const DARK: Theme = {
   muted: '#8E8E93',
   accent: '#4DA3FF',
   border: '#2C2C2E',
+  divider: '#3A3A3C',
   pill: '#2C2C2E',
   warning: '#EA7E00',
   info: '#239AF6',

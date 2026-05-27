@@ -1,10 +1,9 @@
-import React, { useLayoutEffect } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, Theme, SPACING } from './theme';
-import { WidgetCard, ActionButton, StatusDot, NavButtonGroup } from './components/ui';
+import { WidgetCard, ActionButton, StatusDot } from './components/ui';
 import { Squishy } from './Squishy';
-import { SystemIcon } from './SystemIcon';
 import { usePersona } from './PersonaContext';
 import {
   PAYMENTS_SECTIONS, PAYMENTS_CONTACTS, PAYMENTS_ACTIONS, PAYMENTS_UPCOMING, PAYMENTS_RECENT,
@@ -76,19 +75,7 @@ export function PaymentsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { persona } = usePersona();
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: 'Payments',
-      headerLargeTitle: false,
-      headerLeft: () => (
-        <NavButtonGroup
-          items={[
-            { key: 'profile', label: 'Profile and settings', onPress: () => navigation.navigate('Settings'), render: (col) => <SystemIcon ios="person" android="person" size={20} color={col} /> },
-          ]}
-        />
-      ),
-    });
-  }, [navigation, c]);
+  // Top navigation intentionally removed — clean slate, to be rebuilt fresh.
 
   return (
     <ScrollView

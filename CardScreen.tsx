@@ -1,10 +1,10 @@
-import React, { useLayoutEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 import { CartesianChart, Line } from 'victory-native';
 import { useTheme, Theme, SPACING } from './theme';
-import { Surface, WidgetCard, ListRow, StatusDot, ActionButton, NavButtonGroup } from './components/ui';
+import { Surface, WidgetCard, ListRow, StatusDot, ActionButton } from './components/ui';
 import { Squishy } from './Squishy';
 import { SystemIcon } from './SystemIcon';
 import { WalletCard } from './WalletCard';
@@ -125,19 +125,7 @@ export function CardScreen({ navigation }: any) {
     });
   };
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: 'Cards',
-      headerLargeTitle: false,
-      headerLeft: () => (
-        <NavButtonGroup
-          items={[
-            { key: 'profile', label: 'Profile and settings', onPress: () => navigation.navigate('Settings'), render: (col) => <SystemIcon ios="person" android="person" size={20} color={col} /> },
-          ]}
-        />
-      ),
-    });
-  }, [navigation, c]);
+  // Top navigation intentionally removed — clean slate, to be rebuilt fresh.
 
   const onAction = (key: string) => {
     if (key === 'details') setFlipped((f) => !f);

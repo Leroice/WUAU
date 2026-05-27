@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, StyleProp, ViewStyle, useColorScheme } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { Squishy } from '../Squishy';
 import { SystemIcon, IconSpec } from '../SystemIcon';
 import { Theme, WU_YELLOW, SPACING, RADIUS } from '../theme';
@@ -20,32 +21,51 @@ export function WULogo({ color = '#000000', width = 36, height = 20 }: { color?:
   );
 }
 
-/**
- * iOS 26 nav-bar button group (Figma 754:48381): a fully-rounded translucent
- * "glass" pill (h44, px6, gap20) housing 36×36 icon buttons with proper touch
- * targets. Used for header leading/trailing controls. `render(color)` draws each
- * icon (so SVG icons + SystemIcon both work); color is the vibrant label colour.
- */
-export function NavButtonGroup({
-  items,
-}: { items: { key: string; onPress?: () => void; label: string; render: (color: string) => React.ReactNode }[] }) {
+/** WU brand mark, centred in the navigation bar. Theme-aware tint. */
+export function HeaderLogo() {
   const dark = useColorScheme() === 'dark';
-  const color = dark ? '#FFFFFF' : '#1A1A1A';
+  return <WULogo color={dark ? '#FFFFFF' : '#000000'} width={40} height={22} />;
+}
+
+// ─── Native bar buttons (stock iOS toolbar) ──────────────────────────────────
+// Plain bar-button items hosted in the navigator's own UINavigationBar. NO
+// custom background, capsule or glass — we hand iOS just the SF Symbol (Material
+// on Android) and let the system render its standard control. hitSlop gives the
+// native ~44pt touch target without indenting the glyph from the bar's edge.
+
+/** Generic stock bar-button: a single system icon, no chrome. */
+export function HeaderIconButton({
+  onPress, label, ios, android, size = 24,
+}: { onPress?: () => void; label: string; ios: string; android: string; size?: number }) {
+  const dark = useColorScheme() === 'dark';
+  const color = dark ? '#FFFFFF' : '#000000';
   return (
-    <View style={[styles.navGroup, { backgroundColor: dark ? 'rgba(70,70,74,0.6)' : 'rgba(255,255,255,0.7)' }]}>
-      {items.map((it) => (
-        <Pressable
-          key={it.key}
-          onPress={it.onPress}
-          style={styles.navGroupBtn}
-          hitSlop={6}
-          accessibilityRole="button"
-          accessibilityLabel={it.label}
-        >
-          {it.render(color)}
-        </Pressable>
-      ))}
-    </View>
+    <Pressable
+      onPress={onPress}
+      hitSlop={12}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => ({ opacity: pressed ? 0.4 : 1 })}
+    >
+      <SystemIcon ios={ios} android={android} size={size} color={color} />
+    </Pressable>
+  );
+}
+
+/**
+ * Shared profile control — the SINGLE source for the profile glyph in every
+ * screen's bar, so it can't drift between pages. Opens the Settings drawer
+ * (the left-panel menu animation).
+ */
+export function HeaderProfileButton() {
+  const navigation = useNavigation();
+  return (
+    <HeaderIconButton
+      label="Profile and settings"
+      onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+      ios="person.crop.circle"
+      android="account-circle"
+    />
   );
 }
 
@@ -191,12 +211,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   surfacePad: { padding: SPACING.lg },
-  navGroup: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    height: 44, borderRadius: 22, paddingHorizontal: 6, gap: 20,
-    shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
-  },
-  navGroupBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   widgetHeader: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg },
   sectionHeader: {
     flexDirection: 'row',

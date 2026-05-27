@@ -5,6 +5,7 @@ import { useTheme, Theme, WU_YELLOW, SPACING } from './theme';
 import { useDesign, COMPONENT_LIBRARY, WEIGHTS, ComponentDef, Control, DesignTokens } from './DesignContext';
 import { Surface, WidgetCard, ListRow, ActionButton, SectionHeader } from './components/ui';
 import { SystemIcon } from './SystemIcon';
+import { usePersona, PERSONAS } from './PersonaContext';
 
 const SAMPLE_ICON = { ios: 'star.fill', android: 'star' };
 
@@ -119,10 +120,11 @@ export function ComponentLibraryScreen({ navigation }: any) {
   const c = useTheme();
   const insets = useSafeAreaInsets();
   const { tokens, reset } = useDesign();
+  const { persona, setPersona } = usePersona();
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: 'Component Library',
+      title: 'App settings',
       headerLargeTitle: false,
       headerRight: () => (
         <Pressable onPress={reset} hitSlop={10} accessibilityRole="button" accessibilityLabel="Reset design">
@@ -139,6 +141,31 @@ export function ComponentLibraryScreen({ navigation }: any) {
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
     >
+      {/* Scenario — demo persona switcher (relocated here from the Settings panel) */}
+      <View style={styles.block}>
+        <Text style={[styles.blockName, { color: c.text }]}>Scenario</Text>
+        <Text style={[styles.blockBlurb, { color: c.muted }]}>
+          Switch the demo persona — reshapes balances, accounts, contacts and transactions across the app.
+        </Text>
+        <View style={styles.personaRow}>
+          {PERSONAS.map((p) => {
+            const active = p.id === persona.id;
+            return (
+              <Pressable
+                key={p.id}
+                onPress={() => setPersona(p.id)}
+                style={[styles.personaChip, { backgroundColor: active ? WU_YELLOW : c.card, borderColor: active ? WU_YELLOW : c.border }]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+              >
+                <Text style={[styles.personaLabel, { color: active ? '#000000' : c.text }]}>{p.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Text style={[styles.personaBlurb, { color: c.muted }]}>{persona.blurb}</Text>
+      </View>
+
       <Text style={[styles.intro, { color: c.muted }]}>
         Live design tokens — tweak a value and every instance across the app updates instantly.
       </Text>
@@ -183,4 +210,9 @@ const styles = StyleSheet.create({
   miniVisa: { fontSize: 18, fontWeight: '800', fontStyle: 'italic', color: '#000000' },
   json: { fontFamily: 'Courier', fontSize: 12, padding: 12, borderRadius: 12, lineHeight: 18 },
   logBtn: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 8 },
+  personaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
+  personaChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth },
+  personaLabel: { fontSize: 14, fontWeight: '600' },
+  personaBlurb: { fontSize: 13, marginTop: 8, lineHeight: 18 },
 });
+
