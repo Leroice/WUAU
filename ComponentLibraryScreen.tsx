@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, Theme, WU_YELLOW, SPACING } from './theme';
 import { useDesign, COMPONENT_LIBRARY, WEIGHTS, ComponentDef, Control, DesignTokens } from './DesignContext';
-import { Surface, WidgetCard, ListRow, ActionButton, SectionHeader, StatusDot, Carousel, CarouselCard, SegmentedControl, HeaderIconButton, HeaderLogo } from './components/ui';
+import { Surface, WidgetCard, ListRow, ActionButton, SectionHeader, StatusDot, Carousel, CarouselCard, SegmentedControl, TransactionRow, HeaderIconButton, HeaderLogo } from './components/ui';
 import { ConverterWidget, CurrencySelector } from './ConverterWidget';
 import { SystemIcon } from './SystemIcon';
 import { usePersona, PERSONAS } from './PersonaContext';
@@ -48,6 +48,16 @@ const CATALOG: { name: string; blurb: string; render: (c: Theme) => React.ReactN
         <CarouselCard c={c} initials="MB" avatarColor="#FFF0E8" avatarTextColor="#C45E1A" title="Maria B." subtitle="500.00 AUD" action="Send again" />
         <CarouselCard c={c} initials="AH" avatarColor="#C9F1E8" avatarTextColor="#048F6E" title="50,000.00 JPY" subtitle="To Aurora · 16 Apr" />
       </Carousel>
+    ),
+  },
+  {
+    name: 'Transaction Row',
+    blurb: 'Account/stack list row — icon circle + title/time + amount, with an optional status dot.',
+    render: (c) => (
+      <View style={{ gap: 8 }}>
+        <TransactionRow c={c} icon={{ ios: 'cart.fill', android: 'shopping-cart' }} title="Woolworths" sub="11:04AM • Melbourne" amount="180.22 AUD" status="Pending" />
+        <TransactionRow c={c} icon={{ ios: 'building.columns.fill', android: 'account-balance' }} title="Cash deposit" sub="09:15PM • Richmond" amount="+350.00 AUD" positive />
+      </View>
     ),
   },
   {
