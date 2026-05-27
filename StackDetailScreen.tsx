@@ -1,5 +1,5 @@
-import React, { useLayoutEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, Animated, Easing, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { useTheme, Theme } from './theme';
@@ -17,25 +17,52 @@ function closeButton(navigation: any, color: string) {
   );
 }
 
-// Large stack emoji (72pt) with a progress ring showing goal completion.
-function BigStackEmoji({ c, emoji, progress }: { c: Theme; emoji: string; progress?: number }) {
-  const size = 72;
-  const stroke = 4;
+// Animated SVG ring so the progress arc can sweep in on mount.
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+// Large stack doughnut with a progress ring. On mount the ring sweeps clockwise
+// to its value while the whole doughnut gently scales/fades up — no overshoot,
+// matching the app's calm motion language.
+function BigStackEmoji({ c, emoji, progress, size = 104 }: { c: Theme; emoji: string; progress?: number; size?: number }) {
+  const stroke = 5;
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
   const p = Math.max(0, Math.min(1, progress ?? 0));
+  const inner = size - 22;
+  const draw = useRef(new Animated.Value(0)).current; // ring sweep 0 → 1 (SVG prop, JS-driven)
+  const pop = useRef(new Animated.Value(0)).current;  // scale + opacity 0 → 1
+  // Both JS-driven to keep a single paradigm: the SVG ring can't use the native
+  // driver, and the scroll-collapse parent is JS-driven too.
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(draw, { toValue: 1, duration: 700, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
+      Animated.timing(pop, { toValue: 1, duration: 450, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
+    ]).start();
+  }, [draw, pop]);
+
   return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+    <Animated.View
+      style={{
+        width: size, height: size, alignItems: 'center', justifyContent: 'center',
+        opacity: pop, transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }],
+      }}
+    >
       {progress != null && (
         <Svg width={size} height={size} style={[StyleSheet.absoluteFill, { transform: [{ rotate: '-90deg' }] }]}>
           <Circle cx={size / 2} cy={size / 2} r={r} stroke={c.border} strokeWidth={stroke} fill="none" />
-          <Circle cx={size / 2} cy={size / 2} r={r} stroke={c.accent} strokeWidth={stroke} fill="none" strokeDasharray={`${circ * p} ${circ}`} strokeLinecap="round" />
+          <AnimatedCircle
+            cx={size / 2} cy={size / 2} r={r} stroke={c.accent} strokeWidth={stroke} fill="none"
+            strokeDasharray={`${circ} ${circ}`}
+            strokeDashoffset={draw.interpolate({ inputRange: [0, 1], outputRange: [circ, circ * (1 - p)] })}
+            strokeLinecap="round"
+          />
         </Svg>
       )}
-      <View style={{ width: size - 14, height: size - 14, borderRadius: (size - 14) / 2, backgroundColor: c.pill, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ fontSize: 32 }}>{emoji}</Text>
+      <View style={{ width: inner, height: inner, borderRadius: inner / 2, backgroundColor: c.pill, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: Math.round(size * 0.42) }}>{emoji}</Text>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -48,6 +75,8 @@ function BigStackEmoji({ c, emoji, progress }: { c: Theme; emoji: string; progre
 export function StackDetailScreen({ navigation, route }: any) {
   const c = useTheme();
   const insets = useSafeAreaInsets();
+  const { width: screenW } = useWindowDimensions();
+  const innerW = screenW - 32; // hero content width (16pt padding each side) — explicit so child widths resolve reliably under the sticky header
   const p = route?.params ?? {};
   const emoji: string = p.emoji ?? '💍';
   const name: string = p.name ?? 'Vow Renewal';
@@ -58,14 +87,19 @@ export function StackDetailScreen({ navigation, route }: any) {
   const pct = progress != null ? ` (${Math.round(progress * 100)}%)` : '';
   const sections = STACK_TXNS;
   const scrollY = useRef(new Animated.Value(0)).current;
+  // Hero hugs its content: measure the collapsible blocks instead of hard-coding
+  // heights, so a bigger doughnut or more padding is never clipped or constrained.
+  const [emojiH0, setEmojiH0] = useState(104);
+  const [extrasH0, setExtrasH0] = useState(160);
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: name, headerRight: () => closeButton(navigation, c.text) });
   }, [navigation, c, name]);
 
-  const fade = scrollY.interpolate({ inputRange: [0, 70], outputRange: [1, 0], extrapolate: 'clamp' });
-  const emojiH = scrollY.interpolate({ inputRange: [0, 70], outputRange: [80, 0], extrapolate: 'clamp' });
-  const extrasH = scrollY.interpolate({ inputRange: [0, 70], outputRange: [BTN_ROW_H + 40, 0], extrapolate: 'clamp' });
+  const COLLAPSE = 120; // scroll distance over which the hero extras collapse away
+  const fade = scrollY.interpolate({ inputRange: [0, COLLAPSE], outputRange: [1, 0], extrapolate: 'clamp' });
+  const emojiH = scrollY.interpolate({ inputRange: [0, COLLAPSE], outputRange: [emojiH0, 0], extrapolate: 'clamp' });
+  const extrasH = scrollY.interpolate({ inputRange: [0, COLLAPSE], outputRange: [extrasH0, 0], extrapolate: 'clamp' });
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
@@ -80,22 +114,29 @@ export function StackDetailScreen({ navigation, route }: any) {
         {/* sticky, collapsing hero */}
         <View style={[styles.hero, { backgroundColor: c.surface }]}>
           <Animated.View style={{ opacity: fade, height: emojiH, overflow: 'hidden', alignItems: 'center' }}>
-            <BigStackEmoji c={c} emoji={emoji} progress={progress} />
+            <View onLayout={(e) => setEmojiH0(e.nativeEvent.layout.height)} style={{ alignItems: 'center', width: innerW }}>
+              <BigStackEmoji c={c} emoji={emoji} progress={progress} />
+            </View>
           </Animated.View>
           <Text style={[styles.heroLabel, { color: c.muted }]}>{ACCOUNT_DETAIL.availableLabel}</Text>
           <Text style={[styles.heroAmount, { color: c.text }]}>{amount}</Text>
           {goalAmount ? <Text style={[styles.heroGoal, { color: c.muted }]}>Goal {goalAmount}{pct}</Text> : null}
-          <Animated.View style={{ opacity: fade, height: extrasH, overflow: 'hidden', alignItems: 'center', width: '100%' }}>
-            {targetDate ? (
-              <View style={[styles.chip, { backgroundColor: c.pill }]}>
-                <SystemIcon ios="calendar" android="event" size={13} color={c.text} />
-                <Text style={[styles.chipText, { color: c.text }]}>Target date: {targetDate}</Text>
+          <Animated.View style={{ opacity: fade, height: extrasH, overflow: 'hidden', alignItems: 'center' }}>
+            <View onLayout={(e) => setExtrasH0(e.nativeEvent.layout.height)} style={{ alignItems: 'center', width: innerW }}>
+              <View style={{ height: 16 }} />
+              {targetDate ? (
+                <View style={[styles.chip, { backgroundColor: c.pill }]}>
+                  <SystemIcon ios="calendar" android="event" size={13} color={c.text} />
+                  <Text style={[styles.chipText, { color: c.text }]}>Target date: {targetDate}</Text>
+                </View>
+              ) : null}
+              <View style={{ height: 26 }} />
+              <View style={styles.heroButtons}>
+                <ActionButton icon={{ ios: 'plus', android: 'add' }} label="Add" />
+                <ActionButton icon={{ ios: 'arrow.left.arrow.right', android: 'swap-horiz' }} label="Convert" />
+                <ActionButton icon={{ ios: 'ellipsis', android: 'more-horiz' }} label="More" />
               </View>
-            ) : null}
-            <View style={styles.heroButtons}>
-              <ActionButton icon={{ ios: 'plus', android: 'add' }} label="Add" />
-              <ActionButton icon={{ ios: 'arrow.left.arrow.right', android: 'swap-horiz' }} label="Convert" />
-              <ActionButton icon={{ ios: 'ellipsis', android: 'more-horiz' }} label="More" />
+              <View style={{ height: 12 }} />
             </View>
           </Animated.View>
         </View>
@@ -121,9 +162,9 @@ const styles = StyleSheet.create({
   heroLabel: { fontSize: 14, fontWeight: '500', textAlign: 'center', marginTop: 4 },
   heroAmount: { fontSize: 32, fontFamily: 'PPRightGrotesk-WideMedium', textAlign: 'center' },
   heroGoal: { fontSize: 12, fontWeight: '500', textAlign: 'center' },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginTop: 8 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   chipText: { fontSize: 12, fontWeight: '500' },
-  heroButtons: { flexDirection: 'row', gap: 8, height: BTN_ROW_H, width: '100%', marginTop: 12 },
+  heroButtons: { flexDirection: 'row', gap: 8, height: BTN_ROW_H, width: '100%' },
 
   list: { paddingHorizontal: 16, gap: 8, marginTop: 4 },
   section: { gap: 8, marginTop: 8 },

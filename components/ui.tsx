@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet, StyleProp, ViewStyle, TextStyle, useColorScheme } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, Pressable, ScrollView, StyleSheet, StyleProp, ViewStyle, TextStyle, useColorScheme, Animated, Easing } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { Squishy } from '../Squishy';
@@ -270,31 +270,86 @@ export function CarouselCard({
 
 /**
  * Pill segmented control — the ONE toggle (e.g. Accounts → Currencies / Stacks).
- * Black selected segment on a grey track; theme-aware for dark mode.
+ * A sliding pill (black selected segment on a grey track) animates between
+ * segments; theme-aware for dark mode. Pass an external `progress` Animated.Value
+ * to drive content in unison (the owner runs the timing); omit it and the control
+ * self-animates the pill. Segment frames are measured so the pill tracks unequal
+ * widths exactly. Driven on the JS thread so the pill width and label colours can
+ * cross-fade alongside translateX (none of which the native driver supports).
  */
 export function SegmentedControl({
-  c, options, selectedIndex, onChange,
-}: { c: Theme; options: readonly string[]; selectedIndex: number; onChange: (i: number) => void }) {
+  c, options, selectedIndex, onChange, progress: externalProgress,
+}: {
+  c: Theme; options: readonly string[]; selectedIndex: number; onChange: (i: number) => void;
+  progress?: Animated.Value;
+}) {
   const dark = useColorScheme() === 'dark';
   const track = dark ? '#2C2C2E' : '#E6E6E6';
   const selBg = dark ? '#FFFFFF' : '#000000';
   const selText = dark ? '#000000' : '#FFFFFF';
+
+  const internal = useRef(new Animated.Value(selectedIndex)).current;
+  const progress = externalProgress ?? internal;
+
+  // Per-segment frames (x + width), measured on layout — the pill follows these
+  // so it lands precisely even when segments differ in width.
+  const [frames, setFrames] = useState<{ x: number; width: number }[]>([]);
+  const range = options.map((_, i) => i);
+  const ready = frames.length === options.length && range.every((i) => !!frames[i]);
+  const setFrame = (i: number, x: number, width: number) =>
+    setFrames((prev) => {
+      const next = prev.slice();
+      next[i] = { x, width };
+      return next;
+    });
+
+  // When no external driver is supplied, own the pill animation; otherwise the
+  // caller drives `progress` (so its content can move in unison with the pill).
+  useEffect(() => {
+    if (externalProgress) return;
+    Animated.timing(internal, {
+      toValue: selectedIndex, duration: 280, easing: Easing.inOut(Easing.ease), useNativeDriver: false,
+    }).start();
+  }, [selectedIndex, externalProgress, internal]);
+
   return (
     <View style={[styles.segTrack, { backgroundColor: track }]}>
-      {options.map((opt, i) => {
-        const selected = i === selectedIndex;
-        return (
-          <Pressable
-            key={opt}
-            onPress={() => onChange(i)}
-            style={[styles.segItem, selected && { backgroundColor: selBg }]}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
+      {ready && (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.segPill,
+            {
+              backgroundColor: selBg,
+              width: progress.interpolate({ inputRange: range, outputRange: frames.map((f) => f.width) }),
+              transform: [{ translateX: progress.interpolate({ inputRange: range, outputRange: frames.map((f) => f.x) }) }],
+            },
+          ]}
+        />
+      )}
+      {options.map((opt, i) => (
+        <Pressable
+          key={opt}
+          onPress={() => onChange(i)}
+          onLayout={(e) => setFrame(i, e.nativeEvent.layout.x, e.nativeEvent.layout.width)}
+          style={styles.segItem}
+          accessibilityRole="button"
+          accessibilityState={{ selected: i === selectedIndex }}
+        >
+          <Animated.Text
+            style={[
+              styles.segText,
+              {
+                color: ready
+                  ? progress.interpolate({ inputRange: [i - 1, i, i + 1], outputRange: [c.text, selText, c.text], extrapolate: 'clamp' })
+                  : i === selectedIndex ? selText : c.text,
+              },
+            ]}
           >
-            <Text style={[styles.segText, { color: selected ? selText : c.text }]}>{opt}</Text>
-          </Pressable>
-        );
-      })}
+            {opt}
+          </Animated.Text>
+        </Pressable>
+      ))}
     </View>
   );
 }
@@ -335,6 +390,7 @@ const styles = StyleSheet.create({
   carouselSubtitle: { fontSize: 13 },
   carouselAction: { fontSize: 13, fontWeight: '500' },
   segTrack: { flexDirection: 'row', height: 32, borderRadius: 100, padding: 2, gap: 4, alignItems: 'center', alignSelf: 'center' },
+  segPill: { position: 'absolute', top: 2, bottom: 2, left: 0, borderRadius: 100 },
   segItem: { height: '100%', borderRadius: 20, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
   segText: { fontSize: 14, fontWeight: '500' },
   txRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 16 },

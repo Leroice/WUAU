@@ -1,5 +1,5 @@
-import React, { useLayoutEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import React, { useLayoutEffect, useRef, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, Pressable, Animated, Easing } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { useTheme, Theme, WU_YELLOW } from './theme';
@@ -82,7 +82,55 @@ export function AccountsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { persona } = usePersona();
   const [tab, setTab] = useState(0); // 0 = Currencies, 1 = Stacks
+  const [prevTab, setPrevTab] = useState(0); // outgoing tab, shown during a transition
+  const [transitioning, setTransitioning] = useState(false);
+  const progress = useRef(new Animated.Value(0)).current; // shared driver: pill + content move as one
   const home = persona.totalBalance.currency;
+
+  // Tapping a segment runs ONE timing that drives the pill (inside SegmentedControl)
+  // and the content cross-fade below off the same value — so they move in unison.
+  const changeTab = (i: number) => {
+    if (i === tab) return;
+    setPrevTab(tab);
+    setTab(i);
+    setTransitioning(true);
+    Animated.timing(progress, {
+      toValue: i, duration: 280, easing: Easing.inOut(Easing.ease), useNativeDriver: false,
+    }).start(({ finished }) => { if (finished) setTransitioning(false); });
+  };
+
+  // A content layer: full opacity at its own index, faded + slid aside toward neighbours.
+  const SLIDE = 20;
+  const layerStyle = (index: number) => ({
+    opacity: progress.interpolate({ inputRange: [index - 1, index, index + 1], outputRange: [0, 1, 0], extrapolate: 'clamp' as const }),
+    transform: [{ translateX: progress.interpolate({ inputRange: [index - 1, index, index + 1], outputRange: [SLIDE, 0, -SLIDE], extrapolate: 'clamp' as const }) }],
+  });
+
+  const renderRows = (which: number) =>
+    which === 0
+      ? persona.accounts.map((a: any, i: number) => (
+          <AccountRow
+            key={i}
+            c={c}
+            leading={<Flag c={c} emoji={a.flag} />}
+            title={a.code}
+            amount={`${a.amount} ${a.code}`}
+            subAmount={a.code === home ? undefined : a.label}
+            onPress={() => navigation.navigate('AccountDetail', { code: a.code, amount: a.amount })}
+          />
+        ))
+      : STACKS.map((s: Stack, i: number) => (
+          <AccountRow
+            key={i}
+            c={c}
+            leading={<StackEmoji c={c} emoji={s.emoji} progress={s.progress} />}
+            title={s.name}
+            subtitle={s.goal}
+            amount={s.amount}
+            subAmount={s.subAmount}
+            onPress={() => navigation.navigate('StackDetail', { emoji: s.emoji, name: s.name, amount: s.amount, goalAmount: s.goalAmount, progress: s.progress, targetDate: s.targetDate })}
+          />
+        ));
 
   // Native nav bar — title + close ✕ (no custom header chrome).
   useLayoutEffect(() => {
@@ -116,35 +164,19 @@ export function AccountsScreen({ navigation }: any) {
 
         {/* Segmented control */}
         <View style={styles.segWrap}>
-          <SegmentedControl c={c} options={ACCOUNTS_PAGE.tabs} selectedIndex={tab} onChange={setTab} />
+          <SegmentedControl c={c} options={ACCOUNTS_PAGE.tabs} selectedIndex={tab} onChange={changeTab} progress={progress} />
         </View>
 
-        {/* List */}
+        {/* List — incoming layer in flow; outgoing layer overlaid during the cross-fade */}
         <View style={styles.list}>
-          {tab === 0
-            ? persona.accounts.map((a: any, i: number) => (
-                <AccountRow
-                  key={i}
-                  c={c}
-                  leading={<Flag c={c} emoji={a.flag} />}
-                  title={a.code}
-                  amount={`${a.amount} ${a.code}`}
-                  subAmount={a.code === home ? undefined : a.label}
-                  onPress={() => navigation.navigate('AccountDetail', { code: a.code, amount: a.amount })}
-                />
-              ))
-            : STACKS.map((s: Stack, i: number) => (
-                <AccountRow
-                  key={i}
-                  c={c}
-                  leading={<StackEmoji c={c} emoji={s.emoji} progress={s.progress} />}
-                  title={s.name}
-                  subtitle={s.goal}
-                  amount={s.amount}
-                  subAmount={s.subAmount}
-                  onPress={() => navigation.navigate('StackDetail', { emoji: s.emoji, name: s.name, amount: s.amount, goalAmount: s.goalAmount, progress: s.progress, targetDate: s.targetDate })}
-                />
-              ))}
+          <Animated.View style={[styles.rowsLayer, layerStyle(tab)]}>
+            {renderRows(tab)}
+          </Animated.View>
+          {transitioning && (
+            <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.rowsLayer, layerStyle(prevTab)]}>
+              {renderRows(prevTab)}
+            </Animated.View>
+          )}
         </View>
 
         {/* Add new */}
@@ -180,7 +212,8 @@ const styles = StyleSheet.create({
 
   segWrap: { paddingHorizontal: 16, alignItems: 'center', paddingTop: 24, paddingBottom: 24 },
 
-  list: { paddingHorizontal: 16, gap: 8 },
+  list: { paddingHorizontal: 16 },
+  rowsLayer: { gap: 8 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 16, borderRadius: 12 },
   rowBody: { flex: 1, flexDirection: 'row', alignItems: 'center' },
   rowLeft: { flex: 1, gap: 2 },
