@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Animated } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from './theme';
 import { SystemIcon } from './SystemIcon';
@@ -99,8 +99,7 @@ export function AccountMoreSheet({ navigation }: any) {
   const c = useTheme();
   const insets = useSafeAreaInsets();
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16, gap: 16 }} showsVerticalScrollIndicator={false}>
+    <View style={{ backgroundColor: c.bg, paddingHorizontal: 16, paddingTop: 20, paddingBottom: insets.bottom + 16, gap: 16 }}>
         {/* account info — one card, copyable rows */}
         <View style={[styles.card, { backgroundColor: c.surface }]}>
           {ACCOUNT_MORE.rows.map((r, i) => (
@@ -135,7 +134,6 @@ export function AccountMoreSheet({ navigation }: any) {
         <Pressable style={styles.closeRow} onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={ACCOUNT_MORE.close}>
           <Text style={[styles.closeText, { color: c.error }]}>{ACCOUNT_MORE.close}</Text>
         </Pressable>
-      </ScrollView>
     </View>
   );
 }
@@ -144,8 +142,8 @@ const styles = StyleSheet.create({
   // hero (white, rounded bottom, sits flush under the native bar)
   hero: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   heroLabel: { fontSize: 14, fontWeight: '500', textAlign: 'center', marginBottom: 8 },
-  heroAmount: { fontSize: 32, fontFamily: 'PPRightGrotesk-WideMedium' },
-  heroRef: { fontSize: 12, fontWeight: '500', marginTop: 4 },
+  heroAmount: { fontSize: 32, fontFamily: 'PPRightGrotesk-WideMedium', textAlign: 'center' },
+  heroRef: { fontSize: 12, fontWeight: '500', marginTop: 4, textAlign: 'center' },
   heroButtons: { flexDirection: 'row', gap: 8, height: BTN_ROW_H },
 
   // transaction list

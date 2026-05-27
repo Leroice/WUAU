@@ -186,6 +186,7 @@ function HomeScreen({ navigation }: any) {
             <Squishy
               key={i}
               scaleTo={0.97}
+              onPress={() => navigation.navigate('AccountDetail', { code: a.code, amount: a.amount })}
               style={[styles.currencyCard, { backgroundColor: dark ? 'rgba(28,28,30,0.85)' : 'rgba(255,255,255,0.85)', borderColor: c.border }]}
             >
               <View style={styles.cardInner}>
@@ -411,6 +412,7 @@ function RootNavigator() {
     headerTintColor: dark ? '#FFFFFF' : '#000000',
     headerStyle: { backgroundColor: dark ? DARK.surface : LIGHT.surface },
     headerTitleStyle: { fontFamily: 'PPRightGrotesk-WideMedium', fontSize: 16 },
+    headerBackButtonDisplayMode: 'minimal' as const,
   };
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -442,7 +444,7 @@ function RootNavigator() {
       <Stack.Screen
         name="AccountMore"
         component={AccountMoreSheet}
-        options={{ headerShown: false, presentation: 'formSheet', sheetAllowedDetents: [0.8, 1], sheetGrabberVisible: true, sheetCornerRadius: 24 }}
+        options={{ headerShown: false, presentation: 'formSheet', sheetAllowedDetents: 'fitToContents', sheetGrabberVisible: true, sheetCornerRadius: 24 }}
       />
     </Stack.Navigator>
   );
