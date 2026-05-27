@@ -277,6 +277,78 @@ export const CONVERTER = {
   pageTitle: 'Select currency',
 };
 
+// ─── ACCOUNTS PAGE ───────────────────────────────────────────────────────────
+export const ACCOUNTS_PAGE = {
+  title: 'Accounts',
+  totalLabel: 'Total balance',
+  tabs: ['Currencies', 'Stacks'] as const,
+  addCurrency: 'Add new currency',
+  addStack: 'Add new stack',
+};
+
+// Savings "stacks" — goal-based pots shown on the Accounts → Stacks tab.
+export type Stack = { emoji: string; name: string; goal?: string; amount: string; subAmount?: string; progress?: number; goalAmount?: string; targetDate?: string };
+export const STACKS: Stack[] = [
+  { emoji: '💍', name: 'Vow Renewal', goal: 'Goal 13,000.00 AUD', amount: '1,800.56 AUD', progress: 0.14, goalAmount: '13,000.00 AUD', targetDate: '01/09/2026' },
+  { emoji: '⛷️', name: 'Niseko', goal: 'Goal 250,000.00 JPY', amount: '207,059.38 JPY', subAmount: '1,883.75 AUD', progress: 0.83 },
+  { emoji: '😎', name: 'New sunglasses', amount: '0.00 GBP', subAmount: '0.00 AUD' },
+];
+
+// ─── ACCOUNT / STACK DETAIL ──────────────────────────────────────────────────
+export type Txn = { title: string; sub: string; amount: string; positive?: boolean; status?: string; icon: { ios: string; android: string } };
+export type TxnSection = { date: string; items: Txn[] };
+
+const TX_CART = { ios: 'cart.fill', android: 'shopping-cart' };
+const TX_CASH = { ios: 'banknote.fill', android: 'payments' };
+const TX_BANK = { ios: 'building.columns.fill', android: 'account-balance' };
+const TX_XFER = { ios: 'arrow.left.arrow.right', android: 'swap-horiz' };
+
+export const ACCOUNT_TXNS: TxnSection[] = [
+  { date: '8 March 2026', items: [
+    { title: 'Woolworths', sub: '11:04AM • Melbourne', amount: '180.22 AUD', status: 'Pending', icon: TX_CART },
+    { title: 'ATM withdrawal', sub: '09:15AM • Richmond', amount: '500.00 AUD', icon: TX_CASH },
+  ] },
+  { date: '6 March 2026', items: [
+    { title: 'Cash deposit', sub: '09:15PM • Richmond', amount: '+350.00 AUD', positive: true, icon: TX_BANK },
+    { title: 'ATM withdrawal', sub: '09:15AM • Richmond', amount: '500.00 AUD', icon: TX_CASH },
+    { title: 'Woolworths', sub: '11:04AM • Melbourne', amount: '58.46 AUD', status: 'Pending', icon: TX_CART },
+  ] },
+  { date: '2 March 2026', items: [
+    { title: 'Woolworths', sub: '11:04AM • Melbourne', amount: '180.22 AUD', status: 'Pending', icon: TX_CART },
+    { title: 'Cash deposit', sub: '09:15PM • Richmond', amount: '+350.00 AUD', positive: true, icon: TX_BANK },
+  ] },
+];
+
+export const ACCOUNT_DETAIL = {
+  availableLabel: 'Available balance',
+  accountRef: '123456 123456789',
+  emptyTitle: 'Uh oh! No transactions found.',
+  emptySubtitle: 'Start transacting to see your activity here.',
+};
+
+// "More" native bottom-sheet content for an account.
+export const ACCOUNT_MORE = {
+  rows: [
+    { label: 'Account name', value: 'Liam Smith Johnson' },
+    { label: 'Bank', value: 'Western Union Financial Services' },
+    { label: 'Bank address', value: '--' },
+    { label: 'BSB', value: '123 456' },
+    { label: 'Account number', value: '123 456 789' },
+  ],
+  links: [
+    { title: 'View statements', desc: 'Description.', icon: { ios: 'doc.text.fill', android: 'description' } },
+    { title: 'Need help?', desc: 'Get support or find out more.', icon: { ios: 'questionmark.circle.fill', android: 'help-outline' } },
+  ],
+  close: 'Close account',
+};
+
+export const STACK_TXNS: TxnSection[] = [
+  { date: '8 March 2026', items: [{ title: 'Payment from AUD', sub: '05:55PM', amount: '+350.00 AUD', positive: true, icon: TX_XFER }] },
+  { date: '6 March 2026', items: [{ title: 'Payment from AUD', sub: '05:55PM', amount: '+50.20 AUD', positive: true, icon: TX_XFER }] },
+  { date: '22 February 2026', items: [{ title: 'Payment from AUD', sub: '05:55PM', amount: '+100.06 AUD', positive: true, icon: TX_XFER }] },
+  { date: '2 February 2026', items: [{ title: 'Payment from AUD', sub: '05:55PM', amount: '+500.00 AUD', positive: true, icon: TX_XFER }] },
+];
+
 // ─── SETTINGS ────────────────────────────────────────────────────────────────
 export const SETTINGS = {
   appVersion: '1.0.0',

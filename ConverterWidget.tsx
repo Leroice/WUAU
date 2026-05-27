@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, TextInput, StyleSheet, useColorScheme } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { useTheme, WU_YELLOW } from './theme';
+import { WIDGET_TITLE } from './components/ui';
 import { SystemIcon } from './SystemIcon';
 import { Squishy } from './Squishy';
 import { CONVERTER, TOP_CURRENCIES, ALL_CURRENCIES, RATES_PER_AUD, Currency } from './mockData';
@@ -102,7 +103,7 @@ export function ConverterWidget({ style, navigation, onPressSend }: Props) {
     const newUp = !flowUp;
     setAmount(fmt(newUp ? m * rate : m / rate));
     setFlowUp(newUp);
-    rot.value = withSpring(rot.value + 180, { damping: 15, stiffness: 200 });
+    rot.value = withTiming(rot.value + 180, { duration: 450, easing: Easing.inOut(Easing.cubic) });
   };
 
   // Design tokens (light = exact Figma values; dark = theme-aware equivalents).
@@ -151,7 +152,7 @@ export function ConverterWidget({ style, navigation, onPressSend }: Props) {
       {/* section header — title (no chevron, intentional) + special-rate chip */}
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <Text style={[styles.title, { color: c.text }]} numberOfLines={1}>
+          <Text style={[styles.title, WIDGET_TITLE, { color: c.text }]} numberOfLines={1}>
             {CONVERTER.title}
           </Text>
           <View style={[styles.chip, { backgroundColor: chipBg }]}>
@@ -183,7 +184,7 @@ export function ConverterWidget({ style, navigation, onPressSend }: Props) {
             <Squishy
               scaleTo={0.9}
               onPress={flip}
-              style={[styles.flip, { backgroundColor: flipBg, borderColor: c.surface }]}
+              style={[styles.flip, { backgroundColor: flipBg }]}
               accessibilityRole="button"
               accessibilityLabel="Flip currencies"
             >
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
   // section-header: pt16, gap8
   header: { paddingTop: 16, width: '100%' },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  title: { flex: 1, fontSize: 15, fontWeight: '600', letterSpacing: -0.23, lineHeight: 20 },
+  title: { flex: 1 },
   // chip_rate-special: bg #d0e1ee, radius24, pl8 pr8 pt4 pb4, gap4
   chip: {
     flexDirection: 'row',
@@ -266,12 +267,11 @@ const styles = StyleSheet.create({
   // flip: 36 circle #f1f1f1, centred over the 4px gap between fields
   flipWrap: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   flip: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 3,
   },
 
   // send: container py16, pill button radius80

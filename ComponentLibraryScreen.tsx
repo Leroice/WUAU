@@ -1,13 +1,103 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, Theme, WU_YELLOW, SPACING } from './theme';
 import { useDesign, COMPONENT_LIBRARY, WEIGHTS, ComponentDef, Control, DesignTokens } from './DesignContext';
-import { Surface, WidgetCard, ListRow, ActionButton, SectionHeader } from './components/ui';
+import { Surface, WidgetCard, ListRow, ActionButton, SectionHeader, StatusDot, Carousel, CarouselCard, SegmentedControl, HeaderIconButton, HeaderLogo } from './components/ui';
+import { ConverterWidget, CurrencySelector } from './ConverterWidget';
 import { SystemIcon } from './SystemIcon';
 import { usePersona, PERSONAS } from './PersonaContext';
 
 const SAMPLE_ICON = { ios: 'star.fill', android: 'star' };
+
+// Stateful preview wrapper for the segmented control.
+function SegmentedPreview({ c }: { c: Theme }) {
+  const [i, setI] = useState(0);
+  return <SegmentedControl c={c} options={['Currencies', 'Stacks']} selectedIndex={i} onChange={setI} />;
+}
+
+// Reference catalog of the SHARED components that have no live tokens — shown so
+// every built component is visible and nameable in one place.
+const CATALOG: { name: string; blurb: string; render: (c: Theme) => React.ReactNode }[] = [
+  {
+    name: 'Section Header',
+    blurb: 'Widget title type (shared WIDGET_TITLE). Optional › affordance for drill-in widgets.',
+    render: (c) => (
+      <View style={{ gap: 6 }}>
+        <SectionHeader c={c} title="Recent transactions" onPress={() => {}} />
+        <SectionHeader c={c} title="Send Money" />
+      </View>
+    ),
+  },
+  {
+    name: 'Carousel',
+    blurb: 'The single horizontal scroller behind every in-widget carousel (contacts, upcoming, …).',
+    render: (c) => (
+      <Carousel>
+        {[0, 1, 2, 3].map((n) => (
+          <View key={n} style={{ width: 110, height: 64, borderRadius: 12, backgroundColor: c.pill }} />
+        ))}
+      </Carousel>
+    ),
+  },
+  {
+    name: 'Carousel Card',
+    blurb: 'The single card inside widget carousels — avatar + title/subtitle/optional action. Shared by Quick Actions and Upcoming.',
+    render: (c) => (
+      <Carousel>
+        <CarouselCard c={c} initials="MB" avatarColor="#FFF0E8" avatarTextColor="#C45E1A" title="Maria B." subtitle="500.00 AUD" action="Send again" />
+        <CarouselCard c={c} initials="AH" avatarColor="#C9F1E8" avatarTextColor="#048F6E" title="50,000.00 JPY" subtitle="To Aurora · 16 Apr" />
+      </Carousel>
+    ),
+  },
+  {
+    name: 'Status Dot',
+    blurb: 'Coloured dot + label for row status (Pending, In progress, Delivered…).',
+    render: (c) => (
+      <View style={{ flexDirection: 'row', gap: 20 }}>
+        <StatusDot c={c} color={c.warning} label="Pending" />
+        <StatusDot c={c} color={c.info} label="In progress" />
+        <StatusDot c={c} color={c.success} label="Delivered" />
+      </View>
+    ),
+  },
+  {
+    name: 'Segmented Control',
+    blurb: 'Pill toggle — black selected segment on a grey track. Used on the Accounts page.',
+    render: (c) => <SegmentedPreview c={c} />,
+  },
+  {
+    name: 'Currency Selector',
+    blurb: 'Flag + code + up/down caret. The tap target that opens the currency picker.',
+    render: (c) => (
+      <View style={{ flexDirection: 'row', gap: 28 }}>
+        <CurrencySelector cur={{ code: 'AUD', flag: '🇦🇺', name: 'Australian Dollar' }} color={c.text} />
+        <CurrencySelector cur={{ code: 'JPY', flag: '🇯🇵', name: 'Japanese Yen' }} color={c.text} />
+      </View>
+    ),
+  },
+  {
+    name: 'Bar Buttons',
+    blurb: 'Native navigation-bar icon buttons — no chrome, system-tinted (profile, eye, calculator).',
+    render: () => (
+      <View style={{ flexDirection: 'row', gap: 28 }}>
+        <HeaderIconButton label="Profile" ios="person.crop.circle" android="account-circle" />
+        <HeaderIconButton label="Hide balance" ios="eye" android="visibility" />
+        <HeaderIconButton label="Calculator" ios="plus.forwardslash.minus" android="calculate" />
+      </View>
+    ),
+  },
+  {
+    name: 'WU Logo',
+    blurb: 'Brand double-chevron mark. Centred in the nav bar via HeaderLogo.',
+    render: () => <HeaderLogo />,
+  },
+  {
+    name: 'Send Money Converter',
+    blurb: 'The Home converter widget — flip reverses flow (animated), live rate conversion, currency picker.',
+    render: () => <ConverterWidget />,
+  },
+];
 
 // Live preview for each component, rendered with the current tokens.
 function Preview({ name, c }: { name: string; c: Theme }) {
@@ -171,6 +261,17 @@ export function ComponentLibraryScreen({ navigation }: any) {
       </Text>
       {COMPONENT_LIBRARY.map((def) => (
         <ComponentCard key={def.name} def={def} c={c} />
+      ))}
+
+      <Text style={[styles.intro, { color: c.muted }]}>
+        Reference — shared components (no live tokens).
+      </Text>
+      {CATALOG.map((item) => (
+        <View key={item.name} style={styles.block}>
+          <Text style={[styles.blockName, { color: c.text }]}>{item.name}</Text>
+          <Text style={[styles.blockBlurb, { color: c.muted }]}>{item.blurb}</Text>
+          <View style={styles.preview}>{item.render(c)}</View>
+        </View>
       ))}
 
       {/* Export — all current tweak values */}

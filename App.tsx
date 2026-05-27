@@ -19,13 +19,16 @@ import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ActionButton, WidgetCard, HeaderProfileButton, HeaderIconButton, HeaderLogo } from './components/ui';
+import { ActionButton, WidgetCard, Carousel, CarouselCard, CAROUSEL_CARD_W, HeaderProfileButton, HeaderIconButton, HeaderLogo } from './components/ui';
 import { ParticleBalance } from './ParticleBalance';
 import { TweaksProvider } from './TweaksContext';
 import { Squishy } from './Squishy';
 import { ConvertSheet } from './ConvertSheet';
 import { ConverterWidget } from './ConverterWidget';
 import { ChooseCurrencyScreen } from './ChooseCurrencyScreen';
+import { AccountsScreen } from './AccountsScreen';
+import { AccountDetailScreen, AccountMoreSheet } from './AccountDetailScreen';
+import { StackDetailScreen } from './StackDetailScreen';
 import { CardScreen } from './CardScreen';
 import { PaymentsScreen } from './PaymentsScreen';
 import { ComponentLibraryScreen } from './ComponentLibraryScreen';
@@ -146,7 +149,7 @@ function HomeScreen({ navigation }: any) {
               style={[styles.heroLinkLayer, { opacity: linkOpacity }]}
               pointerEvents={balanceHidden ? 'none' : 'auto'}
             >
-              <TouchableOpacity accessibilityRole="button">
+              <TouchableOpacity accessibilityRole="button" onPress={() => navigation.navigate('Accounts')}>
                 <Text style={[styles.viewAll, { color: c.accent }]}>{HOME.viewAllAccounts}</Text>
               </TouchableOpacity>
             </Animated.View>
@@ -157,6 +160,7 @@ function HomeScreen({ navigation }: any) {
             >
               <Squishy
                 scaleTo={0.96}
+                onPress={() => navigation.navigate('Accounts')}
                 style={[styles.viewPill, { backgroundColor: dark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.16)' }]}
                 accessibilityRole="button"
                 accessibilityLabel="View all accounts"
@@ -209,33 +213,24 @@ function HomeScreen({ navigation }: any) {
         </View>
 
         {/* SEND MONEY — currency converter widget */}
-        <ConverterWidget style={styles.widget} navigation={navigation} onPressSend={() => navigation.navigate('Convert')} />
+        <ConverterWidget style={styles.widget} navigation={navigation} />
 
         {/* QUICK ACTIONS WIDGET */}
         <WidgetCard c={c} title={HOME.sections.quickActions} onPressHeader={() => {}} style={styles.widget}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.widgetCarousel}
-            snapToInterval={CARD_WIDTH + CARD_GAP}
-            snapToAlignment="start"
-            decelerationRate="fast"
-          >
+          <Carousel snapWidth={CAROUSEL_CARD_W + CARD_GAP}>
             {contacts.map((contact, i) => (
-              <Squishy key={i} scaleTo={0.96} style={[styles.contactCard, { backgroundColor: c.pill, borderWidth: 0 }]}>
-                <View style={styles.cardInner}>
-                  <View style={[styles.contactAvatar, { backgroundColor: contact.color }]}>
-                    <Text style={[styles.avatarText, { color: contact.textColor }]}>{contact.initials}</Text>
-                  </View>
-                  <View style={styles.cardTextStack}>
-                    <Text style={[styles.contactName, { color: c.muted }]}>{contact.name}</Text>
-                    <Text style={[styles.contactAmount, { color: c.text }]}>{contact.amount}</Text>
-                    <Text style={[styles.contactAction, { color: c.accent }]}>{contact.action}</Text>
-                  </View>
-                </View>
-              </Squishy>
+              <CarouselCard
+                key={i}
+                c={c}
+                initials={contact.initials}
+                avatarColor={contact.color}
+                avatarTextColor={contact.textColor}
+                title={contact.name}
+                subtitle={contact.amount}
+                action={contact.action}
+              />
             ))}
-          </ScrollView>
+          </Carousel>
         </WidgetCard>
 
         {/* RECENT TRANSACTIONS WIDGET */}
@@ -406,6 +401,17 @@ function DrawerRoot() {
 
 function RootNavigator() {
   const navBar = useNavBarChrome();
+  const dark = useColorScheme() === 'dark';
+  // White native nav bar that blends seamlessly with the rounded hero cards on
+  // the account screens. No custom header views — just the system bar.
+  const whiteHeader = {
+    headerShown: true,
+    headerTitleAlign: 'center' as const,
+    headerShadowVisible: false,
+    headerTintColor: dark ? '#FFFFFF' : '#000000',
+    headerStyle: { backgroundColor: dark ? DARK.surface : LIGHT.surface },
+    headerTitleStyle: { fontFamily: 'PPRightGrotesk-WideMedium', fontSize: 16 },
+  };
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Main" component={DrawerRoot} />
@@ -429,6 +435,14 @@ function RootNavigator() {
           headerTitleAlign: 'center',
           headerBackButtonDisplayMode: 'minimal',
         }}
+      />
+      <Stack.Screen name="Accounts" component={AccountsScreen} options={{ ...whiteHeader, headerBackVisible: false }} />
+      <Stack.Screen name="AccountDetail" component={AccountDetailScreen} options={whiteHeader} />
+      <Stack.Screen name="StackDetail" component={StackDetailScreen} options={whiteHeader} />
+      <Stack.Screen
+        name="AccountMore"
+        component={AccountMoreSheet}
+        options={{ headerShown: false, presentation: 'formSheet', sheetAllowedDetents: [0.8, 1], sheetGrabberVisible: true, sheetCornerRadius: 24 }}
       />
     </Stack.Navigator>
   );
@@ -535,20 +549,6 @@ const styles = StyleSheet.create({
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   contactsRow: { gap: CARD_GAP },
   widget: { marginHorizontal: 16, marginBottom: 16 },
-  widgetCarousel: { paddingLeft: 12, paddingRight: 12, paddingBottom: 16, gap: CARD_GAP },
-  contactCard: {
-    width: CARD_WIDTH,
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: 16,
-  },
-  contactAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   avatar: {
     width: 40,
     height: 40,
@@ -557,9 +557,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarText: { fontSize: 15, fontWeight: '700' },
-  contactName: { fontSize: 13 },
-  contactAmount: { fontSize: 15, fontWeight: '600' },
-  contactAction: { fontSize: 13, fontWeight: '500' },
   txCard: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
   txRow: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 8 },
   txMeta: { flex: 1 },

@@ -1,11 +1,17 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet, StyleProp, ViewStyle, useColorScheme } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, StyleProp, ViewStyle, TextStyle, useColorScheme } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { Squishy } from '../Squishy';
 import { SystemIcon, IconSpec } from '../SystemIcon';
 import { Theme, WU_YELLOW, SPACING, RADIUS } from '../theme';
 import { useDesign } from '../DesignContext';
+
+/**
+ * Canonical widget-header title type — the "Send Money" style. Shared by every
+ * widget header (SectionHeader + the converter) so header type never drifts.
+ */
+export const WIDGET_TITLE: TextStyle = { fontSize: 15, fontWeight: '600', letterSpacing: -0.23, lineHeight: 20 };
 
 /** Western Union double-chevron mark. Shared brand glyph. */
 export function WULogo({ color = '#000000', width = 36, height = 20 }: { color?: string; width?: number; height?: number }) {
@@ -130,7 +136,7 @@ export function SectionHeader({
       onPress={onPress}
       accessibilityRole={onPress ? 'button' : 'header'}
     >
-      <Text style={[styles.sectionTitle, { color: c.text }]}>{title}</Text>
+      <Text style={[WIDGET_TITLE, { color: c.text }]}>{title}</Text>
       {onPress && <SystemIcon ios="chevron.right" android="chevron-right" size={14} color={c.muted} />}
     </Pressable>
   );
@@ -204,7 +210,140 @@ export function ActionButton({
   );
 }
 
+/**
+ * Shared horizontal carousel — the ONE scroll container behind every in-widget
+ * carousel (contacts, upcoming, currency cards). Consistent padding, gap, snap
+ * and momentum so all carousels behave identically. Pass `snapWidth` (card width
+ * + gap) to enable snapping; `style`/`contentStyle` to tune a single instance.
+ */
+export function Carousel({
+  children, snapWidth, style, contentStyle,
+}: { children: React.ReactNode; snapWidth?: number; style?: StyleProp<ViewStyle>; contentStyle?: StyleProp<ViewStyle> }) {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      decelerationRate="fast"
+      snapToInterval={snapWidth}
+      snapToAlignment="start"
+      style={style}
+      contentContainerStyle={[styles.carousel, contentStyle]}
+    >
+      {children}
+    </ScrollView>
+  );
+}
+
+/** Fixed width of a carousel card, so a screen can compute snap = width + gap. */
+export const CAROUSEL_CARD_W = 252;
+
+/**
+ * The ONE card used inside widget carousels: circular initials avatar + a
+ * title / subtitle / optional action line. The exact same card backs Home's
+ * Quick Actions and Payments' Upcoming carousels — content differs, look does not.
+ */
+export function CarouselCard({
+  c, initials, avatarColor, avatarTextColor, title, subtitle, action, onPress,
+}: {
+  c: Theme; initials: string; avatarColor: string; avatarTextColor: string;
+  title: string; subtitle: string; action?: string; onPress?: () => void;
+}) {
+  return (
+    <Squishy
+      scaleTo={0.96}
+      onPress={onPress}
+      style={[styles.carouselCard, { backgroundColor: c.pill }]}
+      accessibilityRole="button"
+      accessibilityLabel={`${title}, ${subtitle}`}
+    >
+      <View style={[styles.carouselAvatar, { backgroundColor: avatarColor }]}>
+        <Text style={[styles.carouselAvatarText, { color: avatarTextColor }]}>{initials}</Text>
+      </View>
+      <View style={styles.carouselTextStack}>
+        <Text style={[styles.carouselTitle, { color: c.text }]} numberOfLines={1}>{title}</Text>
+        <Text style={[styles.carouselSubtitle, { color: c.muted }]} numberOfLines={1}>{subtitle}</Text>
+        {action ? <Text style={[styles.carouselAction, { color: c.accent }]} numberOfLines={1}>{action}</Text> : null}
+      </View>
+    </Squishy>
+  );
+}
+
+/**
+ * Pill segmented control — the ONE toggle (e.g. Accounts → Currencies / Stacks).
+ * Black selected segment on a grey track; theme-aware for dark mode.
+ */
+export function SegmentedControl({
+  c, options, selectedIndex, onChange,
+}: { c: Theme; options: readonly string[]; selectedIndex: number; onChange: (i: number) => void }) {
+  const dark = useColorScheme() === 'dark';
+  const track = dark ? '#2C2C2E' : '#E6E6E6';
+  const selBg = dark ? '#FFFFFF' : '#000000';
+  const selText = dark ? '#000000' : '#FFFFFF';
+  return (
+    <View style={[styles.segTrack, { backgroundColor: track }]}>
+      {options.map((opt, i) => {
+        const selected = i === selectedIndex;
+        return (
+          <Pressable
+            key={opt}
+            onPress={() => onChange(i)}
+            style={[styles.segItem, selected && { backgroundColor: selBg }]}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+          >
+            <Text style={[styles.segText, { color: selected ? selText : c.text }]}>{opt}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/**
+ * Transaction list row — icon circle + title/subtitle + amount (+ optional
+ * status dot). Shared by the account and stack detail screens.
+ */
+export function TransactionRow({
+  c, icon, title, sub, amount, positive, status,
+}: {
+  c: Theme; icon: IconSpec; title: string; sub: string; amount: string; positive?: boolean; status?: string;
+}) {
+  return (
+    <View style={[styles.txRow, { backgroundColor: c.surface }]}>
+      <View style={[styles.txIcon, { backgroundColor: c.pill }]}>
+        <SystemIcon ios={icon.ios} android={icon.android} size={20} color={c.text} />
+      </View>
+      <View style={styles.txMeta}>
+        <Text style={[styles.txTitle, { color: c.text }]} numberOfLines={1}>{title}</Text>
+        <Text style={[styles.txSub, { color: c.muted }]} numberOfLines={1}>{sub}</Text>
+      </View>
+      <View style={styles.txRight}>
+        <Text style={[styles.txAmount, { color: positive ? c.success : c.text }]} numberOfLines={1}>{amount}</Text>
+        {status ? <StatusDot c={c} color={c.warning} label={status} /> : null}
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  carousel: { paddingHorizontal: 12, paddingBottom: SPACING.lg, gap: SPACING.md },
+  carouselCard: { width: CAROUSEL_CARD_W, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  carouselAvatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  carouselAvatarText: { fontSize: 15, fontWeight: '700' },
+  carouselTextStack: { flex: 1, gap: 2 },
+  carouselTitle: { fontSize: 16, fontWeight: '700' },
+  carouselSubtitle: { fontSize: 13 },
+  carouselAction: { fontSize: 13, fontWeight: '500' },
+  segTrack: { flexDirection: 'row', height: 32, borderRadius: 100, padding: 2, gap: 4, alignItems: 'center', alignSelf: 'center' },
+  segItem: { height: '100%', borderRadius: 20, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+  segText: { fontSize: 14, fontWeight: '500' },
+  txRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 16 },
+  txIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  txMeta: { flex: 1, gap: 2 },
+  txTitle: { fontSize: 14, fontWeight: '500' },
+  txSub: { fontSize: 11 },
+  txRight: { alignItems: 'flex-end', gap: 2 },
+  txAmount: { fontSize: 14, fontWeight: '500' },
   surface: {
     borderRadius: RADIUS.xl,
     borderWidth: StyleSheet.hairlineWidth,
@@ -218,7 +357,6 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     marginBottom: SPACING.md,
   },
-  sectionTitle: { fontSize: 17, fontWeight: '700' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
