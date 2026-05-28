@@ -12,9 +12,9 @@ import { useNudgeState } from './useNudgeState';
  */
 export const useNudges = (touchpoint: NudgeTouchpoint): Nudge[] => {
   const { persona } = usePersona();
-  const { effectiveFlags, dismissedIds } = useNudgeState();
+  const { effectiveFlags, dismissedIds, escalations, appLoads } = useNudgeState();
   return useMemo(
-    () => selectNudges({ persona, touchpoint, flags: effectiveFlags, dismissedIds }),
-    [persona, touchpoint, effectiveFlags, dismissedIds],
+    () => selectNudges({ persona, touchpoint, flags: effectiveFlags, dismissedIds, escalations, appLoads }),
+    [persona, touchpoint, effectiveFlags, dismissedIds, escalations, appLoads],
   );
 };

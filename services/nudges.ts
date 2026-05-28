@@ -1,5 +1,24 @@
 import type { Nudge, NudgeRule, NudgeTouchpoint, Persona, Flags } from '../types';
 
+// ─── Escalating-cadence rule ─────────────────────────────────────────────────
+// Apple Pay nudge cadence per user spec: 0–3 dismisses → every 3rd load,
+// 4–6 → every load (≈24h in real time), 7+ → every 3 loads (≈3 days).
+// Returns true when enough loads have passed since the last dismiss that the
+// nudge is ready to show again.
+export interface EscalationProbe {
+  dismissCount: number;
+  lastDismissedLoad: number;
+}
+
+export function shouldShowEscalating(state: EscalationProbe | undefined, currentLoad: number): boolean {
+  if (!state) return true; // never dismissed → show
+  const loadsSince = currentLoad - state.lastDismissedLoad;
+  const cadence = state.dismissCount <= 3 ? 3
+                 : state.dismissCount <= 6 ? 1
+                 : 3;
+  return loadsSince >= cadence;
+}
+
 // ─── Rule engine ─────────────────────────────────────────────────────────────
 // Pure recursive evaluator. The rule tree describes when a nudge should show
 // (or hide); the engine walks it with no per-rule branching in screens or
@@ -38,16 +57,29 @@ export interface SelectNudgesOpts {
   touchpoint: NudgeTouchpoint;
   /** Merged persona.flags + session overrides (overrides win). */
   flags: Flags;
-  /** IDs the user has dismissed in this session. */
+  /** IDs the user has dismissed in this session (permanent / session / snooze_3d). */
   dismissedIds: Set<string>;
+  /** Escalation tracking — read for nudges with `dismiss: 'escalating'`. */
+  escalations: Record<string, EscalationProbe>;
+  /** Current app-load counter — drives the escalating cadence rule. */
+  appLoads: number;
 }
 
-export function selectNudges({ persona, touchpoint, flags, dismissedIds }: SelectNudgesOpts): Nudge[] {
+export function selectNudges({
+  persona, touchpoint, flags, dismissedIds, escalations, appLoads,
+}: SelectNudgesOpts): Nudge[] {
   const cap = MAX_VISIBLE[touchpoint];
   const eligible = CATALOGUE
     .filter((n) => n.touchpoint === touchpoint)
     .filter((n) => n.segmentScope.includes(persona.segment))
-    .filter((n) => !dismissedIds.has(n.id))
+    .filter((n) => {
+      // escalating nudges live in their own snooze state; everything else
+      // honours the simple dismissedIds set.
+      if (n.dismiss === 'escalating') {
+        return shouldShowEscalating(escalations[n.id], appLoads);
+      }
+      return !dismissedIds.has(n.id);
+    })
     .filter((n) => evaluate(n.showWhen, persona, flags))
     .filter((n) => !n.hideWhen || !evaluate(n.hideWhen, persona, flags))
     .sort((a, b) => b.priority - a.priority);

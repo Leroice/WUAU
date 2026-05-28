@@ -63,7 +63,7 @@ export function NudgeBannerStack({ style }: { style?: any }) {
         <NudgeBanner
           nudge={front}
           onCta={() => handleCta(front)}
-          onDismiss={() => dismiss(front.id)}
+          onDismiss={() => dismiss(front.id, front.dismiss)}
         />
       </View>
       {nudges.length > 1 && (
