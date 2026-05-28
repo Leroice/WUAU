@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated, Easing, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
@@ -68,10 +68,11 @@ function BigStackEmoji({ c, emoji, progress, size = 104 }: { c: Theme; emoji: st
 }
 
 /**
- * Stack detail (Figma 5-21356 / 5-21424). Native nav bar (back + ✕) over a
- * collapsing hero: emoji + progress ring, available balance, goal + target date,
- * and Add/Convert/More — the emoji, chip and buttons fade away on scroll,
- * revealing the date-grouped transaction list. Shares TransactionRow/ActionButton.
+ * Stack detail (Figma 5-21356 / 5-21424). Native nav bar (back + ✕) over a hero
+ * that scrolls with the list (no collapse, so it always returns intact at the
+ * top) and stretches elastically on pull-down; a surface backing keeps the top
+ * bounce gap-free. Doughnut + balance + goal + target date + Add/Convert/More,
+ * then the date-grouped transaction list. Shares TransactionRow/ActionButton.
  */
 export function StackDetailScreen({ navigation, route }: any) {
   const c = useTheme();
@@ -88,58 +89,55 @@ export function StackDetailScreen({ navigation, route }: any) {
   const pct = progress != null ? ` (${Math.round(progress * 100)}%)` : '';
   const { txns: sections } = useStackDetail(name);
   const scrollY = useRef(new Animated.Value(0)).current;
-  // Hero hugs its content: measure the collapsible blocks instead of hard-coding
-  // heights, so a bigger doughnut or more padding is never clipped or constrained.
-  const [emojiH0, setEmojiH0] = useState(104);
-  const [extrasH0, setExtrasH0] = useState(160);
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: name, headerRight: () => closeButton(navigation, c.text) });
   }, [navigation, c, name]);
 
-  const COLLAPSE = 120; // scroll distance over which the hero extras collapse away
-  const fade = scrollY.interpolate({ inputRange: [0, COLLAPSE], outputRange: [1, 0], extrapolate: 'clamp' });
-  const emojiH = scrollY.interpolate({ inputRange: [0, COLLAPSE], outputRange: [emojiH0, 0], extrapolate: 'clamp' });
-  const extrasH = scrollY.interpolate({ inputRange: [0, COLLAPSE], outputRange: [extrasH0, 0], extrapolate: 'clamp' });
+  // Pull-to-stretch: overscrolling past the top (scrollY < 0) grows the doughnut —
+  // an elastic header. No collapse: the hero scrolls away normally and returns
+  // intact, so nothing gets stuck on the way back to the top.
+  const heroScale = scrollY.interpolate({ inputRange: [-220, 0], outputRange: [1.16, 1], extrapolateRight: 'clamp' });
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
-        stickyHeaderIndices={[0]}
         scrollEventThrottle={16}
         onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
         contentInsetAdjustmentBehavior="automatic"
       >
-        {/* sticky, collapsing hero */}
+        {/* Overscroll backing — the hero surface colour extends far above the hero
+            so a top bounce never reveals a gap. */}
+        <View style={{ position: 'absolute', top: -800, left: 0, right: 0, height: 800, backgroundColor: c.surface }} />
+
+        {/* Hero — scrolls with the list; the doughnut stretches on pull-down. */}
         <View style={[styles.hero, { backgroundColor: c.surface }]}>
-          <Animated.View style={{ opacity: fade, height: emojiH, overflow: 'hidden', alignItems: 'center' }}>
-            <View onLayout={(e) => setEmojiH0(e.nativeEvent.layout.height)} style={{ alignItems: 'center', width: innerW }}>
+          <View style={{ width: innerW, alignItems: 'center' }}>
+            <Animated.View style={{ transform: [{ scale: heroScale }] }}>
               <BigStackEmoji c={c} emoji={emoji} progress={progress} />
-            </View>
-          </Animated.View>
+            </Animated.View>
+          </View>
           <Text style={[styles.heroLabel, { color: c.muted }]}>{ACCOUNT_DETAIL.availableLabel}</Text>
           <Text style={[styles.heroAmount, { color: c.text }]}>{amount}</Text>
           {goalAmount ? <Text style={[styles.heroGoal, { color: c.muted }]}>Goal {goalAmount}{pct}</Text> : null}
-          <Animated.View style={{ opacity: fade, height: extrasH, overflow: 'hidden', alignItems: 'center' }}>
-            <View onLayout={(e) => setExtrasH0(e.nativeEvent.layout.height)} style={{ alignItems: 'center', width: innerW }}>
-              <View style={{ height: 16 }} />
-              {targetDate ? (
-                <View style={[styles.chip, { backgroundColor: c.pill }]}>
-                  <SystemIcon ios="calendar" android="event" size={13} color={c.text} />
-                  <Text style={[styles.chipText, { color: c.text }]}>Target date: {targetDate}</Text>
-                </View>
-              ) : null}
-              <View style={{ height: 26 }} />
-              <View style={styles.heroButtons}>
-                <ActionButton icon={{ ios: 'plus', android: 'add' }} label="Add" />
-                <ActionButton icon={{ ios: 'arrow.left.arrow.right', android: 'swap-horiz' }} label="Convert" />
-                <ActionButton icon={{ ios: 'ellipsis', android: 'more-horiz' }} label="More" />
+          <View style={{ width: innerW, alignItems: 'center' }}>
+            <View style={{ height: 16 }} />
+            {targetDate ? (
+              <View style={[styles.chip, { backgroundColor: c.pill }]}>
+                <SystemIcon ios="calendar" android="event" size={13} color={c.text} />
+                <Text style={[styles.chipText, { color: c.text }]}>Target date: {targetDate}</Text>
               </View>
-              <View style={{ height: 12 }} />
+            ) : null}
+            <View style={{ height: 26 }} />
+            <View style={styles.heroButtons}>
+              <ActionButton icon={{ ios: 'plus', android: 'add' }} label="Add" />
+              <ActionButton icon={{ ios: 'arrow.left.arrow.right', android: 'swap-horiz' }} label="Convert" />
+              <ActionButton icon={{ ios: 'ellipsis', android: 'more-horiz' }} label="More" />
             </View>
-          </Animated.View>
+            <View style={{ height: 12 }} />
+          </View>
         </View>
 
         {/* transactions */}
