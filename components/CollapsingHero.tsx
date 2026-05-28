@@ -7,7 +7,9 @@ import { Theme } from '../constants/theme';
 import { ActionButton } from './ui';
 
 const BTN_ROW_H = 60;
-const COLLAPSE = 60; // scroll distance over which the buttons fade & collapse
+const COLLAPSE = 60;         // scroll distance over which buttons fade & collapse
+const STRETCH_RANGE = 220;   // pull-down distance to reach max scale
+const STRETCH_SCALE = 1.16;  // max scale on full pull-down
 
 export type HeroAction = {
   icon: { ios: string; android: string };
@@ -21,49 +23,113 @@ export type CollapsingHeroProps = {
   amount: string;
   /** Optional small text below the amount (account ref, goal, target date, …). */
   subtitle?: string;
+  /**
+   * Optional visual prefix rendered ABOVE the label/amount/subtitle stack —
+   * e.g. a jar doughnut, an avatar, a small chart. When stretchOnPull is on
+   * AND headline is provided, only the headline scales (matches the
+   * familiar pull-the-doughnut behaviour). When stretchOnPull is on without
+   * a headline, the whole text block scales together.
+   */
+  headline?: React.ReactNode;
+  /**
+   * Optional inline metadata rendered BELOW the subtitle and ABOVE the
+   * buttons — e.g. a target-date chip, a status badge, a small row of
+   * tags. Never scales with stretchOnPull, never participates in collapse.
+   */
+  extras?: React.ReactNode;
   actions: HeroAction[];
   /**
-   * Drives the collapse animation on the UI thread. Wire via
+   * Drives the collapse/stretch animations on the UI thread. Wire via
    *   const scrollY = useSharedValue(0);
    *   const onScroll = useAnimatedScrollHandler(e => { scrollY.value = e.contentOffset.y; });
    * and pass to an Animated.ScrollView with stickyHeaderIndices=[0] so the
-   * hero itself stays pinned while content scrolls up behind it. Omit to
-   * render the static (fully expanded) hero — useful in the library.
+   * hero stays pinned while content scrolls up behind it. Omit to render a
+   * static (fully expanded) hero — useful in the library.
    */
   scrollY?: SharedValue<number>;
+  /**
+   * Default true. When false, the action-button row stays at full opacity /
+   * height regardless of scroll position. Use this for screens where there
+   * shouldn't be enough body content to need collapse (e.g. the main Accounts
+   * page) — the header stays predictable, only stretching on pull-down.
+   */
+  collapseOnScroll?: boolean;
+  /**
+   * Default false. When true, the headline + label/amount/subtitle stack
+   * scales up on pull-down (overscroll). The button row never scales.
+   */
+  stretchOnPull?: boolean;
 };
 
 /**
  * Generic collapsing hero — domain-agnostic so it can front any detail screen
- * (account, jar, card insights, etc). Label / amount / subtitle stay pinned
- * when used via stickyHeaderIndices=[0]; the action-button row fades and
- * collapses, masked by the hero's rounded bottom EDGE (overflow:hidden +
+ * (Account, Jar, Card insights, etc) or the Accounts overview. Label / amount
+ * / subtitle stay pinned when used via stickyHeaderIndices=[0]. The button row
+ * fades and clips against the hero's rounded bottom EDGE (overflow:hidden +
  * paddingBottom:0 — the wrapper itself does NOT clip, so the mask is the card
- * frame, not inner padding). A static 16pt sits beneath the buttons even when
- * fully collapsed, so the headline always has breathing room from the edge.
- * All animations run on the UI thread via reanimated — no JS-bridge per frame,
- * smooth on Android.
+ * frame). A static 16pt sits beneath the buttons even when fully collapsed.
+ *
+ * Behaviour modes
+ *   default            collapse on scroll, no stretch    → AccountDetail
+ *   collapseOnScroll:false + stretchOnPull:true        → Accounts (locked
+ *                      buttons, predictable header, elastic on pull-down)
+ *   stretchOnPull:true (with default collapse)         → JarDetail (doughnut
+ *                      headline scales on pull; buttons collapse on scroll)
  *
  * Pair with <CollapsingHeroBacking/> inside the same scroll view to keep the
  * surface colour above the hero on overscroll.
+ *
+ * All animation runs on the UI thread via reanimated — no JS-bridge per frame.
  */
-export function CollapsingHero({ c, label, amount, subtitle, actions, scrollY }: CollapsingHeroProps) {
-  // Worklets need stable shape, so fall back to a local SharedValue when the
+export function CollapsingHero({
+  c, label, amount, subtitle, headline, extras, actions, scrollY,
+  collapseOnScroll = true,
+  stretchOnPull = false,
+}: CollapsingHeroProps) {
+  // Worklets need stable shape; fall back to a local SharedValue when the
   // caller doesn't drive the collapse (e.g. library previews).
   const fallback = useSharedValue(0);
   const sy = scrollY ?? fallback;
 
-  const buttonsStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(sy.value, [0, COLLAPSE], [1, 0], Extrapolation.CLAMP),
-    height: interpolate(sy.value, [0, COLLAPSE], [BTN_ROW_H, 0], Extrapolation.CLAMP),
-    marginTop: interpolate(sy.value, [0, COLLAPSE], [24, 0], Extrapolation.CLAMP),
-  }));
+  // Button row: optional collapse on scroll (positive scrollY).
+  const buttonsStyle = useAnimatedStyle(() => {
+    if (!collapseOnScroll) {
+      return { opacity: 1, height: BTN_ROW_H, marginTop: 24 };
+    }
+    return {
+      opacity: interpolate(sy.value, [0, COLLAPSE], [1, 0], Extrapolation.CLAMP),
+      height: interpolate(sy.value, [0, COLLAPSE], [BTN_ROW_H, 0], Extrapolation.CLAMP),
+      marginTop: interpolate(sy.value, [0, COLLAPSE], [24, 0], Extrapolation.CLAMP),
+    };
+  }, [collapseOnScroll]);
+
+  // Content block (headline + label + amount + subtitle): optional stretch on
+  // pull (negative scrollY). Buttons stay static — they don't scale.
+  const contentStretch = useAnimatedStyle(() => {
+    const scale = stretchOnPull
+      ? interpolate(sy.value, [-STRETCH_RANGE, 0], [STRETCH_SCALE, 1], Extrapolation.CLAMP)
+      : 1;
+    return { transform: [{ scale }] };
+  }, [stretchOnPull]);
+
+  // With a headline present, stretch applies only to the headline (matches
+  // the doughnut-pull-up gesture). Without a headline, stretch applies to the
+  // whole text block. Either way the action row and extras stay still.
+  const hasHeadline = !!headline;
+  const headlineStretch = hasHeadline ? contentStretch : undefined;
+  const textStretch = hasHeadline ? undefined : contentStretch;
 
   return (
     <View style={[styles.hero, { backgroundColor: c.surface }]}>
-      <Text style={[styles.heroLabel, { color: c.muted }]}>{label}</Text>
-      <Text style={[styles.heroAmount, { color: c.text }]}>{amount}</Text>
-      {subtitle ? <Text style={[styles.heroRef, { color: c.muted }]}>{subtitle}</Text> : null}
+      {headline ? (
+        <Animated.View style={[styles.headlineSlot, headlineStretch]}>{headline}</Animated.View>
+      ) : null}
+      <Animated.View style={textStretch}>
+        <Text style={[styles.heroLabel, { color: c.muted }]}>{label}</Text>
+        <Text style={[styles.heroAmount, { color: c.text }]}>{amount}</Text>
+        {subtitle ? <Text style={[styles.heroRef, { color: c.muted }]}>{subtitle}</Text> : null}
+      </Animated.View>
+      {extras ? <View style={styles.extrasSlot}>{extras}</View> : null}
       <Animated.View style={[styles.heroButtonsWrap, buttonsStyle]}>
         <View style={styles.heroButtons}>
           {actions.map((a, i) => (
@@ -102,6 +168,8 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 24,
     overflow: 'hidden',
   },
+  headlineSlot: { alignItems: 'center', marginBottom: 12 },
+  extrasSlot: { alignItems: 'center', marginTop: 12 },
   heroLabel: { fontSize: 14, fontWeight: '500', textAlign: 'center', marginBottom: 8 },
   heroAmount: { fontSize: 32, fontFamily: 'PPRightGrotesk-WideMedium', textAlign: 'center' },
   heroRef: { fontSize: 12, fontWeight: '500', marginTop: 4, textAlign: 'center' },

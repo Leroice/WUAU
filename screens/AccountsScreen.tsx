@@ -1,11 +1,13 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated as RNAnimated, Easing } from 'react-native';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { useTheme, Theme, WU_YELLOW } from '../constants/theme';
 import { SystemIcon } from '../components/SystemIcon';
 import { Squishy } from '../components/Squishy';
-import { ActionButton, SegmentedControl } from '../components/ui';
+import { SegmentedControl } from '../components/ui';
+import { CollapsingHero, CollapsingHeroBacking } from '../components/CollapsingHero';
 import { usePersona } from '../hooks/usePersona';
 import { ACCOUNTS_PAGE } from '../services/content';
 import { useJars } from '../hooks/useJars';
@@ -75,9 +77,13 @@ function AccountRow({
 }
 
 /**
- * Accounts page (Figma WU Beta App 5-20294 Currencies / 5-20398 Jars). A
- * rounded-bottom header card (total balance + Add/Convert), a segmented control
- * toggling Currencies ⇄ Jars, the matching list, and an "Add new …" pill.
+ * Accounts page (Figma WU Beta App 5-20294 Currencies / 5-20398 Jars).
+ *
+ * Uses <CollapsingHero/> for the balance card — but with `collapseOnScroll`
+ * locked off: the action-button row stays accessible regardless of how far
+ * the user scrolls. Stretch-on-pull is on, so the header still feels alive
+ * when pulled down (consistent with AccountDetail / JarDetail). The
+ * segmented control + list + add-new pill remain in the body below.
  */
 export function AccountsScreen({ navigation }: any) {
   const c = useTheme();
@@ -87,8 +93,14 @@ export function AccountsScreen({ navigation }: any) {
   const [tab, setTab] = useState(0); // 0 = Currencies, 1 = Jars
   const [prevTab, setPrevTab] = useState(0); // outgoing tab, shown during a transition
   const [transitioning, setTransitioning] = useState(false);
-  const progress = useRef(new Animated.Value(0)).current; // shared driver: pill + content move as one
+  const progress = useRef(new RNAnimated.Value(0)).current; // shared driver: pill + content move as one
   const home = persona.totalBalance.currency;
+
+  // Scroll position drives the CollapsingHero's stretch-on-pull. UI thread.
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
 
   // Tapping a segment runs ONE timing that drives the pill (inside SegmentedControl)
   // and the content cross-fade below off the same value — so they move in unison.
@@ -97,7 +109,7 @@ export function AccountsScreen({ navigation }: any) {
     setPrevTab(tab);
     setTab(i);
     setTransitioning(true);
-    Animated.timing(progress, {
+    RNAnimated.timing(progress, {
       toValue: i, duration: 280, easing: Easing.inOut(Easing.ease), useNativeDriver: false,
     }).start(({ finished }) => { if (finished) setTransitioning(false); });
   };
@@ -149,21 +161,31 @@ export function AccountsScreen({ navigation }: any) {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} showsVerticalScrollIndicator={false} contentInsetAdjustmentBehavior="automatic">
-        {/* Header card (white, rounded bottom) — flush under the native nav bar */}
-        <View style={[styles.header, { backgroundColor: c.surface, paddingTop: 8 }]}>
-          <View style={styles.totalBlock}>
-            <Text style={[styles.totalLabel, { color: c.muted }]}>{ACCOUNTS_PAGE.totalLabel}</Text>
-            <Text style={[styles.totalAmount, { color: c.text }]}>
-              {persona.totalBalance.amount} {persona.totalBalance.currency}
-            </Text>
-          </View>
+      <Animated.ScrollView
+        showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={[0]}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        {/* Sticky CollapsingHero — index 0. Locked from collapse (rare to need
+            enough scroll for that on this screen); stretches on pull-down. */}
+        <CollapsingHero
+          c={c}
+          label={ACCOUNTS_PAGE.totalLabel}
+          amount={`${persona.totalBalance.amount} ${persona.totalBalance.currency}`}
+          scrollY={scrollY}
+          collapseOnScroll={false}
+          stretchOnPull
+          actions={[
+            { icon: { ios: 'plus', android: 'add' }, label: 'Add' },
+            { icon: { ios: 'arrow.left.arrow.right', android: 'swap-horiz' }, label: 'Convert' },
+          ]}
+        />
 
-          <View style={styles.headerButtons}>
-            <ActionButton icon={{ ios: 'plus', android: 'add' }} label="Add" />
-            <ActionButton icon={{ ios: 'arrow.left.arrow.right', android: 'swap-horiz' }} label="Convert" />
-          </View>
-        </View>
+        {/* Overscroll backing — same surface above so a pull-down stays gap-free. */}
+        <CollapsingHeroBacking c={c} />
 
         {/* Segmented control */}
         <View style={styles.segWrap}>
@@ -172,13 +194,13 @@ export function AccountsScreen({ navigation }: any) {
 
         {/* List — incoming layer in flow; outgoing layer overlaid during the cross-fade */}
         <View style={styles.list}>
-          <Animated.View style={[styles.rowsLayer, layerStyle(tab)]}>
+          <RNAnimated.View style={[styles.rowsLayer, layerStyle(tab)]}>
             {renderRows(tab)}
-          </Animated.View>
+          </RNAnimated.View>
           {transitioning && (
-            <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.rowsLayer, layerStyle(prevTab)]}>
+            <RNAnimated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.rowsLayer, layerStyle(prevTab)]}>
               {renderRows(prevTab)}
-            </Animated.View>
+            </RNAnimated.View>
           )}
         </View>
 
@@ -193,26 +215,12 @@ export function AccountsScreen({ navigation }: any) {
             <Text style={styles.addText}>{tab === 0 ? ACCOUNTS_PAGE.addCurrency : ACCOUNTS_PAGE.addJar}</Text>
           </Squishy>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // header card: white, rounded bottom 24, gap 24
-  header: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    gap: 24,
-    alignItems: 'center',
-  },
-  totalBlock: { alignItems: 'center', gap: 8, width: '100%' },
-  totalLabel: { fontSize: 14, fontWeight: '500' },
-  totalAmount: { fontSize: 32, fontFamily: 'PPRightGrotesk-WideMedium', textAlign: 'center' },
-  headerButtons: { flexDirection: 'row', gap: 8, width: '100%', height: 60 },
-
   segWrap: { paddingHorizontal: 16, alignItems: 'center', paddingTop: 24, paddingBottom: 24 },
 
   list: { paddingHorizontal: 16 },
