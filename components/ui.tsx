@@ -1,10 +1,17 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet, StyleProp, ViewStyle, useColorScheme } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, Pressable, ScrollView, StyleSheet, StyleProp, ViewStyle, TextStyle, useColorScheme, Animated, Easing } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { Squishy } from '../Squishy';
 import { SystemIcon, IconSpec } from '../SystemIcon';
 import { Theme, WU_YELLOW, SPACING, RADIUS } from '../theme';
 import { useDesign } from '../DesignContext';
+
+/**
+ * Canonical widget-header title type — the "Send Money" style. Shared by every
+ * widget header (SectionHeader + the converter) so header type never drifts.
+ */
+export const WIDGET_TITLE: TextStyle = { fontSize: 15, fontWeight: '600', letterSpacing: -0.23, lineHeight: 20 };
 
 /** Western Union double-chevron mark. Shared brand glyph. */
 export function WULogo({ color = '#000000', width = 36, height = 20 }: { color?: string; width?: number; height?: number }) {
@@ -20,32 +27,51 @@ export function WULogo({ color = '#000000', width = 36, height = 20 }: { color?:
   );
 }
 
-/**
- * iOS 26 nav-bar button group (Figma 754:48381): a fully-rounded translucent
- * "glass" pill (h44, px6, gap20) housing 36×36 icon buttons with proper touch
- * targets. Used for header leading/trailing controls. `render(color)` draws each
- * icon (so SVG icons + SystemIcon both work); color is the vibrant label colour.
- */
-export function NavButtonGroup({
-  items,
-}: { items: { key: string; onPress?: () => void; label: string; render: (color: string) => React.ReactNode }[] }) {
+/** WU brand mark, centred in the navigation bar. Theme-aware tint. */
+export function HeaderLogo() {
   const dark = useColorScheme() === 'dark';
-  const color = dark ? '#FFFFFF' : '#1A1A1A';
+  return <WULogo color={dark ? '#FFFFFF' : '#000000'} width={40} height={22} />;
+}
+
+// ─── Native bar buttons (stock iOS toolbar) ──────────────────────────────────
+// Plain bar-button items hosted in the navigator's own UINavigationBar. NO
+// custom background, capsule or glass — we hand iOS just the SF Symbol (Material
+// on Android) and let the system render its standard control. hitSlop gives the
+// native ~44pt touch target without indenting the glyph from the bar's edge.
+
+/** Generic stock bar-button: a single system icon, no chrome. */
+export function HeaderIconButton({
+  onPress, label, ios, android, size = 24,
+}: { onPress?: () => void; label: string; ios: string; android: string; size?: number }) {
+  const dark = useColorScheme() === 'dark';
+  const color = dark ? '#FFFFFF' : '#000000';
   return (
-    <View style={[styles.navGroup, { backgroundColor: dark ? 'rgba(70,70,74,0.6)' : 'rgba(255,255,255,0.7)' }]}>
-      {items.map((it) => (
-        <Pressable
-          key={it.key}
-          onPress={it.onPress}
-          style={styles.navGroupBtn}
-          hitSlop={6}
-          accessibilityRole="button"
-          accessibilityLabel={it.label}
-        >
-          {it.render(color)}
-        </Pressable>
-      ))}
-    </View>
+    <Pressable
+      onPress={onPress}
+      hitSlop={12}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => ({ opacity: pressed ? 0.4 : 1 })}
+    >
+      <SystemIcon ios={ios} android={android} size={size} color={color} />
+    </Pressable>
+  );
+}
+
+/**
+ * Shared profile control — the SINGLE source for the profile glyph in every
+ * screen's bar, so it can't drift between pages. Opens the Settings drawer
+ * (the left-panel menu animation).
+ */
+export function HeaderProfileButton() {
+  const navigation = useNavigation();
+  return (
+    <HeaderIconButton
+      label="Profile and settings"
+      onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+      ios="person.crop.circle"
+      android="account-circle"
+    />
   );
 }
 
@@ -110,7 +136,7 @@ export function SectionHeader({
       onPress={onPress}
       accessibilityRole={onPress ? 'button' : 'header'}
     >
-      <Text style={[styles.sectionTitle, { color: c.text }]}>{title}</Text>
+      <Text style={[WIDGET_TITLE, { color: c.text }]}>{title}</Text>
       {onPress && <SystemIcon ios="chevron.right" android="chevron-right" size={14} color={c.muted} />}
     </Pressable>
   );
@@ -184,19 +210,202 @@ export function ActionButton({
   );
 }
 
+/**
+ * Shared horizontal carousel — the ONE scroll container behind every in-widget
+ * carousel (contacts, upcoming, currency cards). Consistent padding, gap, snap
+ * and momentum so all carousels behave identically. Pass `snapWidth` (card width
+ * + gap) to enable snapping; `style`/`contentStyle` to tune a single instance.
+ */
+export function Carousel({
+  children, snapWidth, style, contentStyle,
+}: { children: React.ReactNode; snapWidth?: number; style?: StyleProp<ViewStyle>; contentStyle?: StyleProp<ViewStyle> }) {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      decelerationRate="fast"
+      snapToInterval={snapWidth}
+      snapToAlignment="start"
+      style={style}
+      contentContainerStyle={[styles.carousel, contentStyle]}
+    >
+      {children}
+    </ScrollView>
+  );
+}
+
+/** Fixed width of a carousel card, so a screen can compute snap = width + gap. */
+export const CAROUSEL_CARD_W = 252;
+
+/**
+ * The ONE card used inside widget carousels: circular initials avatar + a
+ * title / subtitle / optional action line. The exact same card backs Home's
+ * Quick Actions and Payments' Upcoming carousels — content differs, look does not.
+ */
+export function CarouselCard({
+  c, initials, avatarColor, avatarTextColor, title, subtitle, action, onPress,
+}: {
+  c: Theme; initials: string; avatarColor: string; avatarTextColor: string;
+  title: string; subtitle: string; action?: string; onPress?: () => void;
+}) {
+  return (
+    <Squishy
+      scaleTo={0.96}
+      onPress={onPress}
+      style={[styles.carouselCard, { backgroundColor: c.pill }]}
+      accessibilityRole="button"
+      accessibilityLabel={`${title}, ${subtitle}`}
+    >
+      <View style={[styles.carouselAvatar, { backgroundColor: avatarColor }]}>
+        <Text style={[styles.carouselAvatarText, { color: avatarTextColor }]}>{initials}</Text>
+      </View>
+      <View style={styles.carouselTextStack}>
+        <Text style={[styles.carouselTitle, { color: c.text }]} numberOfLines={1}>{title}</Text>
+        <Text style={[styles.carouselSubtitle, { color: c.muted }]} numberOfLines={1}>{subtitle}</Text>
+        {action ? <Text style={[styles.carouselAction, { color: c.accent }]} numberOfLines={1}>{action}</Text> : null}
+      </View>
+    </Squishy>
+  );
+}
+
+/**
+ * Pill segmented control — the ONE toggle (e.g. Accounts → Currencies / Stacks).
+ * A sliding pill (black selected segment on a grey track) animates between
+ * segments; theme-aware for dark mode. Pass an external `progress` Animated.Value
+ * to drive content in unison (the owner runs the timing); omit it and the control
+ * self-animates the pill. Segment frames are measured so the pill tracks unequal
+ * widths exactly. Driven on the JS thread so the pill width and label colours can
+ * cross-fade alongside translateX (none of which the native driver supports).
+ */
+export function SegmentedControl({
+  c, options, selectedIndex, onChange, progress: externalProgress,
+}: {
+  c: Theme; options: readonly string[]; selectedIndex: number; onChange: (i: number) => void;
+  progress?: Animated.Value;
+}) {
+  const dark = useColorScheme() === 'dark';
+  const track = dark ? '#2C2C2E' : '#E6E6E6';
+  const selBg = dark ? '#FFFFFF' : '#000000';
+  const selText = dark ? '#000000' : '#FFFFFF';
+
+  const internal = useRef(new Animated.Value(selectedIndex)).current;
+  const progress = externalProgress ?? internal;
+
+  // Per-segment frames (x + width), measured on layout — the pill follows these
+  // so it lands precisely even when segments differ in width.
+  const [frames, setFrames] = useState<{ x: number; width: number }[]>([]);
+  const range = options.map((_, i) => i);
+  const ready = frames.length === options.length && range.every((i) => !!frames[i]);
+  const setFrame = (i: number, x: number, width: number) =>
+    setFrames((prev) => {
+      const next = prev.slice();
+      next[i] = { x, width };
+      return next;
+    });
+
+  // When no external driver is supplied, own the pill animation; otherwise the
+  // caller drives `progress` (so its content can move in unison with the pill).
+  useEffect(() => {
+    if (externalProgress) return;
+    Animated.timing(internal, {
+      toValue: selectedIndex, duration: 280, easing: Easing.inOut(Easing.ease), useNativeDriver: false,
+    }).start();
+  }, [selectedIndex, externalProgress, internal]);
+
+  return (
+    <View style={[styles.segTrack, { backgroundColor: track }]}>
+      {ready && (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.segPill,
+            {
+              backgroundColor: selBg,
+              width: progress.interpolate({ inputRange: range, outputRange: frames.map((f) => f.width) }),
+              transform: [{ translateX: progress.interpolate({ inputRange: range, outputRange: frames.map((f) => f.x) }) }],
+            },
+          ]}
+        />
+      )}
+      {options.map((opt, i) => (
+        <Pressable
+          key={opt}
+          onPress={() => onChange(i)}
+          onLayout={(e) => setFrame(i, e.nativeEvent.layout.x, e.nativeEvent.layout.width)}
+          style={styles.segItem}
+          accessibilityRole="button"
+          accessibilityState={{ selected: i === selectedIndex }}
+        >
+          <Animated.Text
+            style={[
+              styles.segText,
+              {
+                color: ready
+                  ? progress.interpolate({ inputRange: [i - 1, i, i + 1], outputRange: [c.text, selText, c.text], extrapolate: 'clamp' })
+                  : i === selectedIndex ? selText : c.text,
+              },
+            ]}
+          >
+            {opt}
+          </Animated.Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+/**
+ * Transaction list row — icon circle + title/subtitle + amount (+ optional
+ * status dot). Shared by the account and stack detail screens.
+ */
+export function TransactionRow({
+  c, icon, title, sub, amount, positive, status,
+}: {
+  c: Theme; icon: IconSpec; title: string; sub: string; amount: string; positive?: boolean; status?: string;
+}) {
+  return (
+    <View style={[styles.txRow, { backgroundColor: c.surface }]}>
+      <View style={[styles.txIcon, { backgroundColor: c.pill }]}>
+        <SystemIcon ios={icon.ios} android={icon.android} size={20} color={c.text} />
+      </View>
+      <View style={styles.txMeta}>
+        <Text style={[styles.txTitle, { color: c.text }]} numberOfLines={1}>{title}</Text>
+        <Text style={[styles.txSub, { color: c.muted }]} numberOfLines={1}>{sub}</Text>
+      </View>
+      <View style={styles.txRight}>
+        <Text style={[styles.txAmount, { color: positive ? c.success : c.text }]} numberOfLines={1}>{amount}</Text>
+        {status ? <StatusDot c={c} color={c.warning} label={status} /> : null}
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  carousel: { paddingHorizontal: 12, paddingBottom: SPACING.lg, gap: SPACING.md },
+  carouselCard: { width: CAROUSEL_CARD_W, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  carouselAvatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  carouselAvatarText: { fontSize: 15, fontWeight: '700' },
+  carouselTextStack: { flex: 1, gap: 2 },
+  carouselTitle: { fontSize: 16, fontWeight: '700' },
+  carouselSubtitle: { fontSize: 13 },
+  carouselAction: { fontSize: 13, fontWeight: '500' },
+  segTrack: { flexDirection: 'row', height: 32, borderRadius: 100, padding: 2, gap: 4, alignItems: 'center', alignSelf: 'center' },
+  segPill: { position: 'absolute', top: 2, bottom: 2, left: 0, borderRadius: 100 },
+  segItem: { height: '100%', borderRadius: 20, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+  segText: { fontSize: 14, fontWeight: '500' },
+  txRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 16 },
+  txIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  txMeta: { flex: 1, gap: 2 },
+  txTitle: { fontSize: 14, fontWeight: '500' },
+  txSub: { fontSize: 11 },
+  txRight: { alignItems: 'flex-end', gap: 2 },
+  txAmount: { fontSize: 14, fontWeight: '500' },
   surface: {
     borderRadius: RADIUS.xl,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
   },
   surfacePad: { padding: SPACING.lg },
-  navGroup: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    height: 44, borderRadius: 22, paddingHorizontal: 6, gap: 20,
-    shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
-  },
-  navGroupBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   widgetHeader: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg },
   sectionHeader: {
     flexDirection: 'row',
@@ -204,7 +413,6 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     marginBottom: SPACING.md,
   },
-  sectionTitle: { fontSize: 17, fontWeight: '700' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

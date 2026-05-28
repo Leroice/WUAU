@@ -1,10 +1,8 @@
-import React, { useLayoutEffect } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, Theme, SPACING } from './theme';
-import { WidgetCard, ActionButton, StatusDot, NavButtonGroup } from './components/ui';
-import { Squishy } from './Squishy';
-import { SystemIcon } from './SystemIcon';
+import { WidgetCard, ActionButton, StatusDot, Carousel, CarouselCard, CAROUSEL_CARD_W } from './components/ui';
 import { usePersona } from './PersonaContext';
 import {
   PAYMENTS_SECTIONS, PAYMENTS_CONTACTS, PAYMENTS_ACTIONS, PAYMENTS_UPCOMING, PAYMENTS_RECENT,
@@ -25,23 +23,7 @@ function ContactChip({ c, item }: { c: Theme; item: typeof PAYMENTS_CONTACTS[num
   );
 }
 
-// Upcoming payment card (grey inner card in the carousel).
-function UpcomingCard({ c, item }: { c: Theme; item: typeof PAYMENTS_UPCOMING[number] }) {
-  return (
-    <View style={[styles.upCard, { backgroundColor: c.pill }]}>
-      <View style={[styles.upAv, { backgroundColor: item.color }]}>
-        <Text style={[styles.upAvText, { color: item.textColor }]}>{item.initials}</Text>
-      </View>
-      <View style={styles.upText}>
-        <View style={styles.upAmountRow}>
-          <Text style={[styles.upAmount, { color: c.text }]}>{item.amount}</Text>
-          <Text style={[styles.upCurrency, { color: c.text }]}>{item.currency}</Text>
-        </View>
-        <Text style={[styles.upDesc, { color: c.muted }]} numberOfLines={1}>{item.desc}</Text>
-      </View>
-    </View>
-  );
-}
+// (UpcomingCard removed — the Upcoming carousel now uses the shared CarouselCard.)
 
 // Recent payment row (status dot OR action link on the right).
 function PaymentRow({ c, item, divider }: { c: Theme; item: typeof PAYMENTS_RECENT[number]; divider: boolean }) {
@@ -76,19 +58,7 @@ export function PaymentsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { persona } = usePersona();
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: 'Payments',
-      headerLargeTitle: false,
-      headerLeft: () => (
-        <NavButtonGroup
-          items={[
-            { key: 'profile', label: 'Profile and settings', onPress: () => navigation.navigate('Settings'), render: (col) => <SystemIcon ios="person" android="person" size={20} color={col} /> },
-          ]}
-        />
-      ),
-    });
-  }, [navigation, c]);
+  // Top navigation intentionally removed — clean slate, to be rebuilt fresh.
 
   return (
     <ScrollView
@@ -99,11 +69,11 @@ export function PaymentsScreen({ navigation }: any) {
     >
       {/* contacts */}
       <WidgetCard c={c} title={PAYMENTS_SECTIONS.contacts} onPressHeader={() => {}}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel}>
+        <Carousel>
           {persona.paymentsContacts.map((item, i) => (
             <ContactChip key={i} c={c} item={item} />
           ))}
-        </ScrollView>
+        </Carousel>
       </WidgetCard>
 
       {/* action buttons */}
@@ -115,18 +85,19 @@ export function PaymentsScreen({ navigation }: any) {
 
       {/* upcoming */}
       <WidgetCard c={c} title={PAYMENTS_SECTIONS.upcoming} onPressHeader={() => {}}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.carousel}
-          snapToInterval={252 + SPACING.md}
-          snapToAlignment="start"
-          decelerationRate="fast"
-        >
+        <Carousel snapWidth={CAROUSEL_CARD_W + SPACING.md}>
           {persona.paymentsUpcoming.map((item, i) => (
-            <UpcomingCard key={i} c={c} item={item} />
+            <CarouselCard
+              key={i}
+              c={c}
+              initials={item.initials}
+              avatarColor={item.color}
+              avatarTextColor={item.textColor}
+              title={`${item.amount} ${item.currency}`}
+              subtitle={item.desc}
+            />
           ))}
-        </ScrollView>
+        </Carousel>
       </WidgetCard>
 
       {/* recent payments */}
@@ -144,7 +115,6 @@ export function PaymentsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: SCREEN_PAD, paddingTop: SPACING.md, gap: SPACING.lg },
   headerBtn: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
-  carousel: { paddingLeft: 12, paddingRight: 12, paddingBottom: SPACING.lg, gap: SPACING.md },
 
   // contacts
   contact: { width: 64, alignItems: 'center', gap: 8 },
@@ -155,16 +125,6 @@ const styles = StyleSheet.create({
 
   // action buttons
   actionsRow: { flexDirection: 'row', gap: SPACING.sm, height: 60 },
-
-  // upcoming card
-  upCard: { width: 252, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  upAv: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
-  upAvText: { fontSize: 14, fontWeight: '700' },
-  upText: { flex: 1 },
-  upAmountRow: { flexDirection: 'row', alignItems: 'baseline', gap: 4 },
-  upAmount: { fontSize: 20, fontWeight: '800' },
-  upCurrency: { fontSize: 13, fontWeight: '600' },
-  upDesc: { fontSize: 12, marginTop: 2 },
 
   // recent list
   listBody: { paddingHorizontal: SPACING.lg },

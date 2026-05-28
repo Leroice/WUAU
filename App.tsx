@@ -17,16 +17,18 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  IconPerson, IconEye,
-} from './Icons';
-import { SystemIcon } from './SystemIcon';
-import { WULogo, ActionButton, WidgetCard, NavButtonGroup } from './components/ui';
+import { ActionButton, WidgetCard, Carousel, CarouselCard, CAROUSEL_CARD_W, HeaderProfileButton, HeaderIconButton, HeaderLogo } from './components/ui';
 import { ParticleBalance } from './ParticleBalance';
 import { TweaksProvider } from './TweaksContext';
 import { Squishy } from './Squishy';
 import { ConvertSheet } from './ConvertSheet';
+import { ConverterWidget } from './ConverterWidget';
+import { ChooseCurrencyScreen } from './ChooseCurrencyScreen';
+import { AccountsScreen } from './AccountsScreen';
+import { AccountDetailScreen, AccountMoreSheet } from './AccountDetailScreen';
+import { StackDetailScreen } from './StackDetailScreen';
 import { CardScreen } from './CardScreen';
 import { PaymentsScreen } from './PaymentsScreen';
 import { ComponentLibraryScreen } from './ComponentLibraryScreen';
@@ -58,6 +60,7 @@ const LIGHT = {
   muted: '#8E8E93',
   accent: '#1A6FD4',
   border: '#E5E5EA',
+  divider: '#C6C6C8',
   pill: '#EBEBEB',
   warning: '#EA7E00',
   info: '#239AF6',
@@ -73,6 +76,7 @@ const DARK = {
   muted: '#8E8E93',
   accent: '#4DA3FF',
   border: '#2C2C2E',
+  divider: '#3A3A3C',
   pill: '#2C2C2E',
   warning: '#EA7E00',
   info: '#239AF6',
@@ -101,31 +105,21 @@ function HomeScreen({ navigation }: any) {
   // Scales down from center as the balance returns (faux "blur out").
   const pillScale = reveal.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] });
 
-  // Present the Convert screen as a native iOS sheet (formSheet) on the root stack.
-  const openConvert = () => navigation.navigate('Convert');
-
-  // Native stack header: person (left), WU logo (title), calculator + eye (right).
-  // Plain native-style header buttons (no custom pill) — just tinted icons.
+  // Stock iOS bar: the profile control (left) is set once on the tab stack; the
+  // eye (right) toggles the hidden-balance reveal and lives here since it owns
+  // that state. The icon flips eye ⇄ eye.slash with the current state.
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: () => <WULogo color={dark ? '#FFFFFF' : '#000000'} />,
-      headerLeft: () => (
-        <NavButtonGroup
-          items={[
-            { key: 'profile', label: 'Profile and settings', onPress: () => navigation.navigate('Settings'), render: (col) => <IconPerson size={20} color={col} /> },
-          ]}
-        />
-      ),
       headerRight: () => (
-        <NavButtonGroup
-          items={[
-            { key: 'calc', label: 'Currency calculator', onPress: openConvert, render: (col) => <SystemIcon ios="plus.forwardslash.minus" android="calculate" size={20} color={col} /> },
-            { key: 'eye', label: balanceHidden ? 'Show balance' : 'Hide balance', onPress: () => setBalanceHidden((h) => !h), render: (col) => <IconEye size={20} color={col} /> },
-          ]}
+        <HeaderIconButton
+          label={balanceHidden ? 'Show balance' : 'Hide balance'}
+          onPress={() => setBalanceHidden((h) => !h)}
+          ios={balanceHidden ? 'eye.slash' : 'eye'}
+          android={balanceHidden ? 'visibility-off' : 'visibility'}
         />
       ),
     });
-  }, [navigation, dark, c, balanceHidden, openConvert]);
+  }, [navigation, balanceHidden]);
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
@@ -155,7 +149,7 @@ function HomeScreen({ navigation }: any) {
               style={[styles.heroLinkLayer, { opacity: linkOpacity }]}
               pointerEvents={balanceHidden ? 'none' : 'auto'}
             >
-              <TouchableOpacity accessibilityRole="button">
+              <TouchableOpacity accessibilityRole="button" onPress={() => navigation.navigate('Accounts')}>
                 <Text style={[styles.viewAll, { color: c.accent }]}>{HOME.viewAllAccounts}</Text>
               </TouchableOpacity>
             </Animated.View>
@@ -166,6 +160,7 @@ function HomeScreen({ navigation }: any) {
             >
               <Squishy
                 scaleTo={0.96}
+                onPress={() => navigation.navigate('Accounts')}
                 style={[styles.viewPill, { backgroundColor: dark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.16)' }]}
                 accessibilityRole="button"
                 accessibilityLabel="View all accounts"
@@ -191,6 +186,7 @@ function HomeScreen({ navigation }: any) {
             <Squishy
               key={i}
               scaleTo={0.97}
+              onPress={() => navigation.navigate('AccountDetail', { code: a.code, amount: a.amount })}
               style={[styles.currencyCard, { backgroundColor: dark ? 'rgba(28,28,30,0.85)' : 'rgba(255,255,255,0.85)', borderColor: c.border }]}
             >
               <View style={styles.cardInner}>
@@ -217,31 +213,25 @@ function HomeScreen({ navigation }: any) {
           ))}
         </View>
 
+        {/* SEND MONEY — currency converter widget */}
+        <ConverterWidget style={styles.widget} navigation={navigation} />
+
         {/* QUICK ACTIONS WIDGET */}
         <WidgetCard c={c} title={HOME.sections.quickActions} onPressHeader={() => {}} style={styles.widget}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.widgetCarousel}
-            snapToInterval={CARD_WIDTH + CARD_GAP}
-            snapToAlignment="start"
-            decelerationRate="fast"
-          >
+          <Carousel snapWidth={CAROUSEL_CARD_W + CARD_GAP}>
             {contacts.map((contact, i) => (
-              <Squishy key={i} scaleTo={0.96} style={[styles.contactCard, { backgroundColor: c.pill, borderWidth: 0 }]}>
-                <View style={styles.cardInner}>
-                  <View style={[styles.contactAvatar, { backgroundColor: contact.color }]}>
-                    <Text style={[styles.avatarText, { color: contact.textColor }]}>{contact.initials}</Text>
-                  </View>
-                  <View style={styles.cardTextStack}>
-                    <Text style={[styles.contactName, { color: c.muted }]}>{contact.name}</Text>
-                    <Text style={[styles.contactAmount, { color: c.text }]}>{contact.amount}</Text>
-                    <Text style={[styles.contactAction, { color: c.accent }]}>{contact.action}</Text>
-                  </View>
-                </View>
-              </Squishy>
+              <CarouselCard
+                key={i}
+                c={c}
+                initials={contact.initials}
+                avatarColor={contact.color}
+                avatarTextColor={contact.textColor}
+                title={contact.name}
+                subtitle={contact.amount}
+                action={contact.action}
+              />
             ))}
-          </ScrollView>
+          </Carousel>
         </WidgetCard>
 
         {/* RECENT TRANSACTIONS WIDGET */}
@@ -272,7 +262,8 @@ function HomeScreen({ navigation }: any) {
   );
 }
 
-// Convert presented as a native iOS sheet (see the root stack's formSheet screen).
+// Convert — a stock native pushed screen (the old bottom-sheet/formSheet
+// presentation was removed).
 function ConvertScreen() {
   const dark = useColorScheme() === 'dark';
   const c = dark ? DARK : LIGHT;
@@ -285,42 +276,41 @@ function ConvertScreen() {
 
 const Tab = createNativeBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
 const HomeStackNav = createNativeStackNavigator();
 const PaymentsStackNav = createNativeStackNavigator();
 const CardStackNav = createNativeStackNavigator();
 
-// Shared native-header chrome — iOS 26 nav bar (Figma node 754:48381):
-// translucent Liquid Glass material, SF Pro Semibold 17 title (letterSpacing -0.43),
-// vibrant primary label colour (#1A1A1A light / white dark) for title + controls.
-function useNavChrome() {
+// Top-level tab screens share one TRANSPARENT bar: the WU logo centred, the
+// shared profile control on the left (opens the Settings drawer), and per-screen
+// right-side controls (e.g. Home's hide-balance eye). Transparent background +
+// no hairline, so the content shows through.
+const TAB_BAR_OPTIONS = {
+  headerShown: true,
+  headerTransparent: true,
+  headerShadowVisible: false,
+  headerStyle: { backgroundColor: 'transparent' },
+  headerTitle: () => <HeaderLogo />,
+  headerTitleAlign: 'center' as const,
+  headerLargeTitle: false,
+  headerLeft: () => <HeaderProfileButton />,
+};
+
+// Pushed detail screens (Convert, App settings) keep a STANDARD navigation bar
+// — title + native back button — which is the correct HIG component for a
+// drilled-in screen.
+function useNavBarChrome() {
   const dark = useColorScheme() === 'dark';
-  const c = dark ? DARK : LIGHT;
-  const label = dark ? '#FFFFFF' : '#1A1A1A';
-  if (Platform.OS === 'android') {
-    // Material 3 top app bar — solid surface, Roboto title (no iOS blur on Android).
-    return {
-      headerStyle: { backgroundColor: c.bg },
-      headerShadowVisible: false,
-      headerTintColor: label,
-      headerTitleStyle: { color: label, fontSize: 20, fontWeight: '600' as const },
-      headerLargeTitleStyle: { color: label },
-    };
-  }
-  // iOS 26 — Liquid Glass nav bar (Figma 754:48381).
   return {
-    headerTransparent: true,
-    headerBlurEffect: 'systemChromeMaterial' as const,
-    headerShadowVisible: false,
-    headerTintColor: label,
-    headerTitleStyle: { color: label, fontSize: 17, fontWeight: '600' as const, letterSpacing: -0.43 },
-    headerLargeTitleStyle: { color: label },
+    headerTintColor: dark ? '#FFFFFF' : '#000000',
+    headerLargeTitle: false,
   };
 }
 
-// Each tab hosts its own native stack so every screen gets a real UINavigationBar.
+// Each tab hosts its own native stack so every screen gets a real native bar.
 function HomeStack() {
   return (
-    <HomeStackNav.Navigator screenOptions={useNavChrome()}>
+    <HomeStackNav.Navigator screenOptions={TAB_BAR_OPTIONS}>
       <HomeStackNav.Screen name="HomeMain" component={HomeScreen} />
     </HomeStackNav.Navigator>
   );
@@ -328,24 +318,16 @@ function HomeStack() {
 
 function PaymentsStack() {
   return (
-    <PaymentsStackNav.Navigator screenOptions={useNavChrome()}>
-      <PaymentsStackNav.Screen
-        name="PaymentsMain"
-        component={PaymentsScreen}
-        options={{ title: 'Payments', headerLargeTitle: false }}
-      />
+    <PaymentsStackNav.Navigator screenOptions={TAB_BAR_OPTIONS}>
+      <PaymentsStackNav.Screen name="PaymentsMain" component={PaymentsScreen} />
     </PaymentsStackNav.Navigator>
   );
 }
 
 function CardStack() {
   return (
-    <CardStackNav.Navigator screenOptions={useNavChrome()}>
-      <CardStackNav.Screen
-        name="CardMain"
-        component={CardScreen}
-        options={{ title: 'Cards', headerLargeTitle: false }}
-      />
+    <CardStackNav.Navigator screenOptions={TAB_BAR_OPTIONS}>
+      <CardStackNav.Screen name="CardMain" component={CardScreen} />
     </CardStackNav.Navigator>
   );
 }
@@ -386,39 +368,83 @@ function TabNavigator() {
   );
 }
 
+// Settings is a left DRAWER PANEL (not a full screen). The standard
+// @react-navigation/drawer slides the app aside (drawerType 'back' = app moves
+// right to reveal the panel underneath) and the panel is the existing Settings
+// UI, width-constrained so its rows fit the container. With the top nav removed,
+// it currently opens via the left-edge swipe (swipeEdgeWidth) — a fresh opener
+// will be wired in when the top navigation is rebuilt.
+function SettingsDrawerContent(props: any) {
+  return <SettingsScreen navigation={props.navigation} />;
+}
+
+function DrawerRoot() {
+  const dark = useColorScheme() === 'dark';
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <SettingsDrawerContent {...props} />}
+      screenOptions={{
+        headerShown: false,
+        drawerType: 'back',
+        drawerPosition: 'left',
+        drawerStyle: { width: '86%', backgroundColor: dark ? DARK.bg : LIGHT.bg },
+        swipeEdgeWidth: 60,
+        // No dimming tint on the view that slides out…
+        overlayColor: 'transparent',
+        // …and round its corners to 48pt as it reveals the Settings panel.
+        sceneStyle: { borderRadius: 48, overflow: 'hidden', backgroundColor: dark ? DARK.bg : LIGHT.bg },
+      }}
+    >
+      <Drawer.Screen name="Tabs" component={TabNavigator} />
+    </Drawer.Navigator>
+  );
+}
+
 function RootNavigator() {
-  const chrome = useNavChrome();
+  const navBar = useNavBarChrome();
+  const dark = useColorScheme() === 'dark';
+  // White native nav bar that blends seamlessly with the rounded hero cards on
+  // the account screens. No custom header views — just the system bar.
+  const whiteHeader = {
+    headerShown: true,
+    headerTitleAlign: 'center' as const,
+    headerShadowVisible: false,
+    headerTintColor: dark ? '#FFFFFF' : '#000000',
+    headerStyle: { backgroundColor: dark ? DARK.surface : LIGHT.surface },
+    headerTitleStyle: { fontFamily: 'PPRightGrotesk-WideMedium', fontSize: 16 },
+    headerBackButtonDisplayMode: 'minimal' as const,
+  };
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Main" component={TabNavigator} />
-      <Stack.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          ...chrome,
-          headerShown: true,
-          title: SETTINGS.title,
-          headerLargeTitle: false,
-          animation: 'slide_from_left',
-          gestureEnabled: true,
-          fullScreenGestureEnabled: true,
-        }}
-      />
+      <Stack.Screen name="Main" component={DrawerRoot} />
       <Stack.Screen
         name="Convert"
         component={ConvertScreen}
-        options={{
-          presentation: 'formSheet',
-          sheetAllowedDetents: [0.92],
-          sheetGrabberVisible: true,
-          sheetCornerRadius: 20,
-          gestureEnabled: true,
-        }}
+        options={{ ...navBar, headerShown: true, title: 'Convert' }}
       />
       <Stack.Screen
-        name="ComponentLibrary"
+        name="AppSettings"
         component={ComponentLibraryScreen}
-        options={{ ...chrome, headerShown: true, title: 'Component Library', headerLargeTitle: false }}
+        options={{ ...navBar, headerShown: true, title: 'App settings' }}
+      />
+      <Stack.Screen
+        name="ChooseCurrency"
+        component={ChooseCurrencyScreen}
+        options={{
+          ...navBar,
+          headerShown: true,
+          title: 'Choose currency',
+          headerTitleAlign: 'center',
+          headerBackButtonDisplayMode: 'minimal',
+        }}
+      />
+      <Stack.Screen name="Accounts" component={AccountsScreen} options={{ ...whiteHeader, headerBackVisible: false }} />
+      <Stack.Screen name="AccountDetail" component={AccountDetailScreen} options={whiteHeader} />
+      <Stack.Screen name="StackDetail" component={StackDetailScreen} options={whiteHeader} />
+      <Stack.Screen
+        name="AccountMore"
+        component={AccountMoreSheet}
+        options={{ headerShown: false, presentation: 'formSheet', sheetAllowedDetents: 'fitToContents', sheetGrabberVisible: true, sheetCornerRadius: 24 }}
       />
     </Stack.Navigator>
   );
@@ -445,22 +471,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  navbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 12,
-  },
-  iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  navRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  navLogo: { position: 'absolute', left: 0, right: 0, bottom: 12, alignItems: 'center', justifyContent: 'center' },
   scroll: { paddingBottom: 16 },
   hero: {
     alignItems: 'center',
@@ -541,20 +551,6 @@ const styles = StyleSheet.create({
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   contactsRow: { gap: CARD_GAP },
   widget: { marginHorizontal: 16, marginBottom: 16 },
-  widgetCarousel: { paddingLeft: 12, paddingRight: 12, paddingBottom: 16, gap: CARD_GAP },
-  contactCard: {
-    width: CARD_WIDTH,
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: 16,
-  },
-  contactAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   avatar: {
     width: 40,
     height: 40,
@@ -563,9 +559,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarText: { fontSize: 15, fontWeight: '700' },
-  contactName: { fontSize: 13 },
-  contactAmount: { fontSize: 15, fontWeight: '600' },
-  contactAction: { fontSize: 13, fontWeight: '500' },
   txCard: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
   txRow: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 8 },
   txMeta: { flex: 1 },
@@ -577,25 +570,4 @@ const styles = StyleSheet.create({
   divider: { height: StyleSheet.hairlineWidth },
   placeholder: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   placeholderText: { fontSize: 17 },
-  tabBarOuter: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 16,
-  },
-  glassTab: {
-    borderRadius: 52,
-    overflow: 'hidden',
-    marginBottom: 8,
-  },
-  tabBarInner: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-  },
-  tabItem: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
 });
