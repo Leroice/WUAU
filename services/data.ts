@@ -6,10 +6,10 @@
 // Data shapes live in types/. Imported here for annotations and re-exported so
 // any existing `from './mockData'` type imports keep resolving during the refactor.
 import type {
-  Account, Currency, Stack, Txn, TxnSection, QuickAction,
+  Account, Currency, Jar, Txn, TxnSection, QuickAction,
   Contact, HomeTransaction, CardSpend, PaymentContact, UpcomingPayment, RecentPayment,
 } from '../types';
-export type { Account, Currency, Stack, Txn, TxnSection, QuickAction };
+export type { Account, Currency, Jar, Txn, TxnSection, QuickAction };
 
 export const USER = {
   firstName: 'Sam',
@@ -281,19 +281,21 @@ export const CONVERTER = {
 export const ACCOUNTS_PAGE = {
   title: 'Accounts',
   totalLabel: 'Total balance',
-  tabs: ['Currencies', 'Stacks'] as const,
+  tabs: ['Currencies', 'Jars'] as const,
   addCurrency: 'Add new currency',
-  addStack: 'Add new stack',
+  addJar: 'Add new jar',
 };
 
-// Savings "stacks" — goal-based pots shown on the Accounts → Stacks tab.
-export const STACKS: Stack[] = [
-  { emoji: '💍', name: 'Vow Renewal', goal: 'Goal 13,000.00 AUD', amount: '1,800.56 AUD', progress: 0.14, goalAmount: '13,000.00 AUD', targetDate: '01/09/2026' },
-  { emoji: '⛷️', name: 'Niseko', goal: 'Goal 250,000.00 JPY', amount: '207,059.38 JPY', subAmount: '1,883.75 AUD', progress: 0.83 },
-  { emoji: '😎', name: 'New sunglasses', amount: '0.00 GBP', subAmount: '0.00 AUD' },
+// Savings "jars" — per-currency pots the user can hold for a specific purpose.
+// Multiple jars can sit under one currency (e.g. USD: FX trading + rainy day).
+// Not interest-yielding — the value is convenience (money on hand) + timing.
+export const JARS: Jar[] = [
+  { emoji: '💍', name: 'Vow Renewal', purpose: 'Goal 13,000.00 AUD', currency: 'AUD', goal: 'Goal 13,000.00 AUD', amount: '1,800.56 AUD', progress: 0.14, goalAmount: '13,000.00 AUD', targetDate: '01/09/2026' },
+  { emoji: '⛷️', name: 'Niseko', purpose: 'Holiday in Japan', currency: 'JPY', goal: 'Goal 250,000.00 JPY', amount: '207,059.38 JPY', subAmount: '1,883.75 AUD', progress: 0.83 },
+  { emoji: '😎', name: 'New sunglasses', purpose: 'Treat-yourself stash', currency: 'GBP', amount: '0.00 GBP', subAmount: '0.00 AUD' },
 ];
 
-// ─── ACCOUNT / STACK DETAIL ──────────────────────────────────────────────────
+// ─── ACCOUNT / JAR DETAIL ────────────────────────────────────────────────────
 const TX_CART = { ios: 'cart.fill', android: 'shopping-cart' };
 const TX_CASH = { ios: 'banknote.fill', android: 'payments' };
 const TX_BANK = { ios: 'building.columns.fill', android: 'account-balance' };
@@ -318,7 +320,7 @@ export const ACCOUNT_TXNS: TxnSection[] = [
     { title: 'Coles', sub: '06:48PM • Carlton', amount: '92.15 AUD', icon: TX_CART },
   ] },
   { date: '5 March 2026', items: [
-    { title: 'Transfer to Stack', sub: '02:11PM • Vow Renewal', amount: '200.00 AUD', icon: TX_XFER },
+    { title: 'Transfer to Jar', sub: '02:11PM • Vow Renewal', amount: '200.00 AUD', icon: TX_XFER },
     { title: 'Café Lune', sub: '08:02AM • Fitzroy', amount: '6.50 AUD', icon: TX_CART },
     { title: 'Bunnings', sub: '04:42PM • Brunswick', amount: '78.30 AUD', icon: TX_CART },
   ] },
@@ -351,7 +353,7 @@ export const ACCOUNT_TXNS: TxnSection[] = [
     { title: 'ATM withdrawal', sub: '10:08AM • CBD', amount: '100.00 AUD', icon: TX_CASH },
   ] },
   { date: '26 February 2026', items: [
-    { title: 'Transfer to Stack', sub: '11:42AM • Holiday Fund', amount: '300.00 AUD', icon: TX_XFER },
+    { title: 'Transfer to Jar', sub: '11:42AM • Holiday Fund', amount: '300.00 AUD', icon: TX_XFER },
     { title: 'Dan Murphy\'s', sub: '07:14PM • Northcote', amount: '54.00 AUD', icon: TX_CART },
   ] },
   { date: '25 February 2026', items: [
@@ -398,7 +400,7 @@ export const ACCOUNT_MORE = {
   close: 'Close account',
 };
 
-export const STACK_TXNS: TxnSection[] = [
+export const JAR_TXNS: TxnSection[] = [
   { date: '8 March 2026', items: [{ title: 'Payment from AUD', sub: '05:55PM', amount: '+350.00 AUD', positive: true, icon: TX_XFER }] },
   { date: '6 March 2026', items: [{ title: 'Payment from AUD', sub: '05:55PM', amount: '+50.20 AUD', positive: true, icon: TX_XFER }] },
   { date: '22 February 2026', items: [{ title: 'Payment from AUD', sub: '05:55PM', amount: '+100.06 AUD', positive: true, icon: TX_XFER }] },

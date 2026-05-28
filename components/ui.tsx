@@ -356,7 +356,7 @@ export function SegmentedControl({
 
 /**
  * Transaction list row — icon circle + title/subtitle + amount (+ optional
- * status dot). Shared by the account and stack detail screens.
+ * status dot). Shared by the account and jar detail screens.
  */
 export function TransactionRow({
   c, icon, title, sub, amount, positive, status,

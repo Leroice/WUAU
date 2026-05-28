@@ -11,7 +11,7 @@ import { ConvertScreen } from '../screens/ConvertScreen';
 import { ChooseCurrencyScreen } from '../screens/ChooseCurrencyScreen';
 import { AccountsScreen } from '../screens/AccountsScreen';
 import { AccountDetailScreen, AccountMoreSheet } from '../screens/AccountDetailScreen';
-import { StackDetailScreen } from '../screens/StackDetailScreen';
+import { JarDetailScreen } from '../screens/JarDetailScreen';
 import { CardScreen } from '../screens/CardScreen';
 import { PaymentsScreen } from '../screens/PaymentsScreen';
 import { ComponentLibraryScreen } from '../screens/ComponentLibraryScreen';
@@ -173,7 +173,7 @@ export function RootNavigator() {
       />
       <Stack.Screen name="Accounts" component={AccountsScreen} options={{ ...whiteHeader, headerBackVisible: false }} />
       <Stack.Screen name="AccountDetail" component={AccountDetailScreen} options={whiteHeader} />
-      <Stack.Screen name="StackDetail" component={StackDetailScreen} options={whiteHeader} />
+      <Stack.Screen name="JarDetail" component={JarDetailScreen} options={whiteHeader} />
       <Stack.Screen
         name="AccountMore"
         component={AccountMoreSheet}

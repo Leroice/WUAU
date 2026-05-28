@@ -8,8 +8,8 @@ import { Squishy } from '../components/Squishy';
 import { ActionButton, SegmentedControl } from '../components/ui';
 import { usePersona } from '../hooks/usePersona';
 import { ACCOUNTS_PAGE } from '../services/content';
-import { useStacks } from '../hooks/useStacks';
-import type { Stack } from '../types';
+import { useJars } from '../hooks/useJars';
+import type { Jar } from '../types';
 
 // Emoji flag in a 40pt circle (currency rows).
 function Flag({ c, emoji }: { c: Theme; emoji: string }) {
@@ -20,8 +20,8 @@ function Flag({ c, emoji }: { c: Theme; emoji: string }) {
   );
 }
 
-// Stack emoji in a circle with an optional progress ring (goal completion).
-function StackEmoji({ c, emoji, progress }: { c: Theme; emoji: string; progress?: number }) {
+// Jar emoji in a circle with an optional progress ring (goal completion).
+function JarEmoji({ c, emoji, progress }: { c: Theme; emoji: string; progress?: number }) {
   const size = 40;
   const stroke = 2.5;
   const r = (size - stroke) / 2;
@@ -44,8 +44,8 @@ function StackEmoji({ c, emoji, progress }: { c: Theme; emoji: string; progress?
           />
         </Svg>
       )}
-      <View style={[styles.stackInner, { backgroundColor: c.pill }]}>
-        <Text style={styles.stackEmoji}>{emoji}</Text>
+      <View style={[styles.jarInner, { backgroundColor: c.pill }]}>
+        <Text style={styles.jarEmoji}>{emoji}</Text>
       </View>
     </View>
   );
@@ -75,16 +75,16 @@ function AccountRow({
 }
 
 /**
- * Accounts page (Figma WU Beta App 5-20294 Currencies / 5-20398 Stacks). A
+ * Accounts page (Figma WU Beta App 5-20294 Currencies / 5-20398 Jars). A
  * rounded-bottom header card (total balance + Add/Convert), a segmented control
- * toggling Currencies ⇄ Stacks, the matching list, and an "Add new …" pill.
+ * toggling Currencies ⇄ Jars, the matching list, and an "Add new …" pill.
  */
 export function AccountsScreen({ navigation }: any) {
   const c = useTheme();
   const insets = useSafeAreaInsets();
   const { persona } = usePersona();
-  const { stacks } = useStacks();
-  const [tab, setTab] = useState(0); // 0 = Currencies, 1 = Stacks
+  const { jars } = useJars();
+  const [tab, setTab] = useState(0); // 0 = Currencies, 1 = Jars
   const [prevTab, setPrevTab] = useState(0); // outgoing tab, shown during a transition
   const [transitioning, setTransitioning] = useState(false);
   const progress = useRef(new Animated.Value(0)).current; // shared driver: pill + content move as one
@@ -122,16 +122,16 @@ export function AccountsScreen({ navigation }: any) {
             onPress={() => navigation.navigate('AccountDetail', { code: a.code, amount: a.amount })}
           />
         ))
-      : stacks.map((s: Stack, i: number) => (
+      : jars.map((j: Jar, i: number) => (
           <AccountRow
             key={i}
             c={c}
-            leading={<StackEmoji c={c} emoji={s.emoji} progress={s.progress} />}
-            title={s.name}
-            subtitle={s.goal}
-            amount={s.amount}
-            subAmount={s.subAmount}
-            onPress={() => navigation.navigate('StackDetail', { emoji: s.emoji, name: s.name, amount: s.amount, goalAmount: s.goalAmount, progress: s.progress, targetDate: s.targetDate })}
+            leading={<JarEmoji c={c} emoji={j.emoji} progress={j.progress} />}
+            title={j.name}
+            subtitle={j.goal}
+            amount={j.amount}
+            subAmount={j.subAmount}
+            onPress={() => navigation.navigate('JarDetail', { emoji: j.emoji, name: j.name, amount: j.amount, goalAmount: j.goalAmount, progress: j.progress, targetDate: j.targetDate })}
           />
         ));
 
@@ -188,9 +188,9 @@ export function AccountsScreen({ navigation }: any) {
             scaleTo={0.96}
             style={styles.addBtn}
             accessibilityRole="button"
-            accessibilityLabel={tab === 0 ? ACCOUNTS_PAGE.addCurrency : ACCOUNTS_PAGE.addStack}
+            accessibilityLabel={tab === 0 ? ACCOUNTS_PAGE.addCurrency : ACCOUNTS_PAGE.addJar}
           >
-            <Text style={styles.addText}>{tab === 0 ? ACCOUNTS_PAGE.addCurrency : ACCOUNTS_PAGE.addStack}</Text>
+            <Text style={styles.addText}>{tab === 0 ? ACCOUNTS_PAGE.addCurrency : ACCOUNTS_PAGE.addJar}</Text>
           </Squishy>
         </View>
       </ScrollView>
@@ -229,8 +229,8 @@ const styles = StyleSheet.create({
   lead: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   leadCircle: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   leadEmoji: { fontSize: 22, lineHeight: 26 },
-  stackInner: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  stackEmoji: { fontSize: 18, lineHeight: 22 },
+  jarInner: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  jarEmoji: { fontSize: 18, lineHeight: 22 },
 
   // add-new pill
   addWrap: { alignItems: 'center', marginTop: 16 },

@@ -6,7 +6,7 @@ export type RootStackParamList = {
   ChooseCurrency: undefined;
   Accounts: undefined;
   AccountDetail: { code: string; amount: string };
-  StackDetail: {
+  JarDetail: {
     emoji: string;
     name: string;
     amount: string;

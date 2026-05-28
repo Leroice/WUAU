@@ -1,6 +1,6 @@
 import { IconSpec } from './common';
 
-// A row in an account/stack transaction list.
+// A row in an account/jar transaction list.
 export interface Txn {
   title: string;
   sub: string;

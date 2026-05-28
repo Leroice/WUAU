@@ -6,7 +6,7 @@ import { useTheme, Theme } from '../constants/theme';
 import { SystemIcon } from '../components/SystemIcon';
 import { ActionButton, TransactionRow } from '../components/ui';
 import { ACCOUNT_DETAIL } from '../services/content';
-import { useStackDetail } from '../hooks/useStackDetail';
+import { useJarDetail } from '../hooks/useJarDetail';
 
 const BTN_ROW_H = 60;
 
@@ -21,10 +21,10 @@ function closeButton(navigation: any, color: string) {
 // Animated SVG ring so the progress arc can sweep in on mount.
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-// Large stack doughnut with a progress ring. On mount the ring sweeps clockwise
+// Large jar doughnut with a progress ring. On mount the ring sweeps clockwise
 // to its value while the whole doughnut gently scales/fades up — no overshoot,
 // matching the app's calm motion language.
-function BigStackEmoji({ c, emoji, progress, size = 104 }: { c: Theme; emoji: string; progress?: number; size?: number }) {
+function BigJarEmoji({ c, emoji, progress, size = 104 }: { c: Theme; emoji: string; progress?: number; size?: number }) {
   const stroke = 5;
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
@@ -68,13 +68,13 @@ function BigStackEmoji({ c, emoji, progress, size = 104 }: { c: Theme; emoji: st
 }
 
 /**
- * Stack detail (Figma 5-21356 / 5-21424). Native nav bar (back + ✕) over a hero
+ * Jar detail (Figma 5-21356 / 5-21424). Native nav bar (back + ✕) over a hero
  * that scrolls with the list (no collapse, so it always returns intact at the
  * top) and stretches elastically on pull-down; a surface backing keeps the top
  * bounce gap-free. Doughnut + balance + goal + target date + Add/Convert/More,
  * then the date-grouped transaction list. Shares TransactionRow/ActionButton.
  */
-export function StackDetailScreen({ navigation, route }: any) {
+export function JarDetailScreen({ navigation, route }: any) {
   const c = useTheme();
   const insets = useSafeAreaInsets();
   const { width: screenW } = useWindowDimensions();
@@ -87,7 +87,7 @@ export function StackDetailScreen({ navigation, route }: any) {
   const progress: number | undefined = p.progress ?? 0.14;
   const targetDate: string | undefined = p.targetDate ?? '01/09/2026';
   const pct = progress != null ? ` (${Math.round(progress * 100)}%)` : '';
-  const { txns: sections } = useStackDetail(name);
+  const { txns: sections } = useJarDetail(name);
   const scrollY = useRef(new Animated.Value(0)).current;
 
   useLayoutEffect(() => {
@@ -116,7 +116,7 @@ export function StackDetailScreen({ navigation, route }: any) {
         <View style={[styles.hero, { backgroundColor: c.surface }]}>
           <View style={{ width: innerW, alignItems: 'center' }}>
             <Animated.View style={{ transform: [{ scale: heroScale }] }}>
-              <BigStackEmoji c={c} emoji={emoji} progress={progress} />
+              <BigJarEmoji c={c} emoji={emoji} progress={progress} />
             </Animated.View>
           </View>
           <Text style={[styles.heroLabel, { color: c.muted }]}>{ACCOUNT_DETAIL.availableLabel}</Text>

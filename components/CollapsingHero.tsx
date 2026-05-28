@@ -35,7 +35,7 @@ export type CollapsingHeroProps = {
 
 /**
  * Generic collapsing hero — domain-agnostic so it can front any detail screen
- * (account, stack, card insights, etc). Label / amount / subtitle stay pinned
+ * (account, jar, card insights, etc). Label / amount / subtitle stay pinned
  * when used via stickyHeaderIndices=[0]; the action-button row fades and
  * collapses, masked by the hero's rounded bottom EDGE (overflow:hidden +
  * paddingBottom:0 — the wrapper itself does NOT clip, so the mask is the card

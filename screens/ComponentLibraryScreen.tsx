@@ -53,7 +53,7 @@ const CATALOG: { name: string; blurb: string; render: (c: Theme) => React.ReactN
   },
   {
     name: 'Transaction Row',
-    blurb: 'Account/stack list row — icon circle + title/time + amount, with an optional status dot.',
+    blurb: 'Account/jar list row — icon circle + title/time + amount, with an optional status dot.',
     render: (c) => (
       <View style={{ gap: 8 }}>
         <TransactionRow c={c} icon={{ ios: 'cart.fill', android: 'shopping-cart' }} title="Woolworths" sub="11:04AM • Melbourne" amount="180.22 AUD" status="Pending" />
