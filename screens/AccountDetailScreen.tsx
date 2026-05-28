@@ -1,10 +1,10 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from './theme';
-import { SystemIcon } from './SystemIcon';
-import { ActionButton, TransactionRow } from './components/ui';
-import { ACCOUNT_TXNS, ACCOUNT_DETAIL, ACCOUNT_MORE } from './mockData';
+import { useTheme } from '../theme';
+import { SystemIcon } from '../components/SystemIcon';
+import { ActionButton, TransactionRow } from '../components/ui';
+import { ACCOUNT_TXNS, ACCOUNT_DETAIL, ACCOUNT_MORE } from '../mockData';
 
 const BTN_ROW_H = 60;
 

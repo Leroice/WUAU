@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, StyleProp, ViewStyle, TextStyle, useColorScheme, Animated, Easing } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
-import { Squishy } from '../Squishy';
-import { SystemIcon, IconSpec } from '../SystemIcon';
+import { Squishy } from './Squishy';
+import { SystemIcon, IconSpec } from './SystemIcon';
 import { Theme, WU_YELLOW, SPACING, RADIUS } from '../theme';
 import { useDesign } from '../DesignContext';
 

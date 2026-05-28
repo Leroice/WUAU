@@ -5,10 +5,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { accelerometer, setUpdateIntervalForType, SensorTypes } from 'react-native-sensors';
-import { WU_YELLOW } from './theme';
-import { useDesign } from './DesignContext';
-import { usePersona } from './PersonaContext';
-import { CARD } from './mockData';
+import { WU_YELLOW } from '../theme';
+import { useDesign } from '../DesignContext';
+import { usePersona } from '../PersonaContext';
+import { CARD } from '../mockData';
 
 const SCREEN_PAD = 20;
 // Collapsed = Figma card frame; expanded = fills the top section width.
@@ -104,7 +104,7 @@ export function WalletCard({ flipped, onToggle }: { flipped: boolean; onToggle: 
           {/* FRONT */}
           <Animated.View style={[styles.face, { borderRadius: tokens.cardRadius }, frontStyle]}>
             <Image
-              source={require('./assets/images/card-image.png')}
+              source={require('../assets/images/card-image.png')}
               style={styles.img}
               resizeMode="cover"
               accessibilityIgnoresInvertColors

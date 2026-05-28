@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Squishy } from './Squishy';
 import { SystemIcon } from './SystemIcon';
-import { CONVERT_MAIN, CONVERSIONS, CONVERT } from './mockData';
+import { CONVERT_MAIN, CONVERSIONS, CONVERT } from '../mockData';
 
 type Theme = {
   bg: string;

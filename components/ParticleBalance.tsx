@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { accelerometer, setUpdateIntervalForType, SensorTypes } from 'react-native-sensors';
-import { useTweaks } from './TweaksContext';
+import { useTweaks } from '../TweaksContext';
 
 const WHITE = '#FFFFFF';
 const SENSOR_INTERVAL_MS = 33; // ~30fps sensor updates

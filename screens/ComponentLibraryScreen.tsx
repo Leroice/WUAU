@@ -1,12 +1,12 @@
 import React, { useLayoutEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme, Theme, WU_YELLOW, SPACING } from './theme';
-import { useDesign, COMPONENT_LIBRARY, WEIGHTS, ComponentDef, Control, DesignTokens } from './DesignContext';
-import { Surface, WidgetCard, ListRow, ActionButton, SectionHeader, StatusDot, Carousel, CarouselCard, SegmentedControl, TransactionRow, HeaderIconButton, HeaderLogo } from './components/ui';
-import { ConverterWidget, CurrencySelector } from './ConverterWidget';
-import { SystemIcon } from './SystemIcon';
-import { usePersona, PERSONAS } from './PersonaContext';
+import { useTheme, Theme, WU_YELLOW, SPACING } from '../theme';
+import { useDesign, COMPONENT_LIBRARY, WEIGHTS, ComponentDef, Control, DesignTokens } from '../DesignContext';
+import { Surface, WidgetCard, ListRow, ActionButton, SectionHeader, StatusDot, Carousel, CarouselCard, SegmentedControl, TransactionRow, HeaderIconButton, HeaderLogo } from '../components/ui';
+import { ConverterWidget, CurrencySelector } from '../components/ConverterWidget';
+import { SystemIcon } from '../components/SystemIcon';
+import { usePersona, PERSONAS } from '../PersonaContext';
 
 const SAMPLE_ICON = { ios: 'star.fill', android: 'star' };
 

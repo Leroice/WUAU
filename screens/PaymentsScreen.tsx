@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme, Theme, SPACING } from './theme';
-import { WidgetCard, ActionButton, StatusDot, Carousel, CarouselCard, CAROUSEL_CARD_W } from './components/ui';
-import { usePersona } from './PersonaContext';
+import { useTheme, Theme, SPACING } from '../theme';
+import { WidgetCard, ActionButton, StatusDot, Carousel, CarouselCard, CAROUSEL_CARD_W } from '../components/ui';
+import { usePersona } from '../PersonaContext';
 import {
   PAYMENTS_SECTIONS, PAYMENTS_CONTACTS, PAYMENTS_ACTIONS, PAYMENTS_UPCOMING, PAYMENTS_RECENT,
-} from './mockData';
+} from '../mockData';
 
 const SCREEN_PAD = 20;
 

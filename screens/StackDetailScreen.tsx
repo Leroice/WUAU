@@ -2,10 +2,10 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated, Easing, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import { useTheme, Theme } from './theme';
-import { SystemIcon } from './SystemIcon';
-import { ActionButton, TransactionRow } from './components/ui';
-import { STACK_TXNS, ACCOUNT_DETAIL } from './mockData';
+import { useTheme, Theme } from '../theme';
+import { SystemIcon } from '../components/SystemIcon';
+import { ActionButton, TransactionRow } from '../components/ui';
+import { STACK_TXNS, ACCOUNT_DETAIL } from '../mockData';
 
 const BTN_ROW_H = 60;
 

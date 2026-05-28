@@ -2,12 +2,12 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, Animated, Easing } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import { useTheme, Theme, WU_YELLOW } from './theme';
-import { SystemIcon } from './SystemIcon';
-import { Squishy } from './Squishy';
-import { ActionButton, SegmentedControl } from './components/ui';
-import { usePersona } from './PersonaContext';
-import { ACCOUNTS_PAGE, STACKS, Stack } from './mockData';
+import { useTheme, Theme, WU_YELLOW } from '../theme';
+import { SystemIcon } from '../components/SystemIcon';
+import { Squishy } from '../components/Squishy';
+import { ActionButton, SegmentedControl } from '../components/ui';
+import { usePersona } from '../PersonaContext';
+import { ACCOUNTS_PAGE, STACKS, Stack } from '../mockData';
 
 // Emoji flag in a 40pt circle (currency rows).
 function Flag({ c, emoji }: { c: Theme; emoji: string }) {
