@@ -13,33 +13,24 @@ import type { Nudge } from '../types';
 
 const SAMPLE_ICON = { ios: 'star.fill', android: 'star' };
 
-// ─── Sample nudges for the four banner variants ──────────────────────────────
+// ─── Sample nudges for the three banner variants ─────────────────────────────
 // Used by the library previews only — the live catalogue lives in services/nudges.ts.
-const SAMPLE_LIGHT_IMAGE_NUDGE: Nudge = {
-  id: 'preview_light_image', touchpoint: 'home_banner', style: 'light-image', priority: 0,
+const SAMPLE_IMAGE_NUDGE: Nudge = {
+  id: 'preview_image', touchpoint: 'home_banner', style: 'image', priority: 0,
   segmentScope: ['S1'], showWhen: { type: 'always' }, dismiss: 'session',
   content: {
-    headline: 'Setup Apple Pay',
-    body: 'Take your card with you and pay in local currency.',
-    cta: { label: 'Set up' },
+    headline: 'Tap to pay anywhere',
+    body: 'Set up Apple Pay in a minute. Spend in local currency.',
+    cta: { label: 'Set it up' },
   },
 };
 const SAMPLE_LIGHT_NUDGE: Nudge = {
   id: 'preview_light', touchpoint: 'home_banner', style: 'light', priority: 0,
   segmentScope: ['S6'], showWhen: { type: 'always' }, dismiss: 'session',
   content: {
-    headline: 'Do more with your money.',
-    body: 'Hold currencies, lock in rates, and pay with a WU debit card.',
-    cta: { label: 'Learn more' },
-  },
-};
-const SAMPLE_IMAGE_BG_NUDGE: Nudge = {
-  id: 'preview_image_bg', touchpoint: 'home_banner', style: 'image-bg', priority: 0,
-  segmentScope: ['S1'], showWhen: { type: 'always' }, dismiss: 'session',
-  content: {
-    headline: 'Hold JPY, send when ready',
-    body: 'Convert when the rate moves. No fee to hold.',
-    cta: { label: 'Add JPY account' },
+    headline: 'A wallet you can spend',
+    body: 'Hold currencies. Lock in rates. Tap your WU card overseas.',
+    cta: { label: 'See how' },
   },
 };
 const SAMPLE_STATUS_NUDGE: Nudge = {
@@ -151,29 +142,22 @@ const CATALOG: { name: string; blurb: string; render: (c: Theme) => React.ReactN
     render: () => <ConverterWidget />,
   },
   {
-    name: 'Nudge Banner — light-image',
-    blurb: 'Default nudge card: white surface, headline + body + optional yellow CTA on the left, image (or placeholder) on the right, X close top-right. Figma NBA-Banner-variants. 120pt tall.',
+    name: 'Nudge Banner — image',
+    blurb: 'Full-bleed image (or solid colour fallback) with a bottom-aligned BlurView + SVG gradient scrim. Headline + body + optional yellow CTA pill at the bottom-left in white. X close top-right. Size + scrim + blur driven by tokens.',
     render: () => (
-      <NudgeBanner nudge={SAMPLE_LIGHT_IMAGE_NUDGE} onCta={() => {}} onDismiss={() => {}} />
+      <NudgeBanner nudge={SAMPLE_IMAGE_NUDGE} onCta={() => {}} onDismiss={() => {}} />
     ),
   },
   {
     name: 'Nudge Banner — light',
-    blurb: 'White card without an image — just headline + body + optional CTA. Used for the S6 wallet intro / S5b retry banners where image isn\'t the point.',
+    blurb: 'White card without an image — headline + body + optional CTA, X close. Used where the message carries itself (S6 wallet intro, S5b retry, S4 track).',
     render: () => (
       <NudgeBanner nudge={SAMPLE_LIGHT_NUDGE} onCta={() => {}} onDismiss={() => {}} />
     ),
   },
   {
-    name: 'Nudge Banner — image-bg',
-    blurb: 'Full-bleed image with dark scrim and white text overlaid. Used for jar/holiday nudges where the imagery sells the moment.',
-    render: () => (
-      <NudgeBanner nudge={SAMPLE_IMAGE_BG_NUDGE} onCta={() => {}} onDismiss={() => {}} />
-    ),
-  },
-  {
     name: 'Nudge Banner — status',
-    blurb: 'Solid colour, headline + small body + progress bar. Used for status / progress-style nudges (e.g. fee-free transfer threshold).',
+    blurb: 'Solid colour, headline + small body + yellow progress bar. Used for status / progress-style nudges (e.g. points until fee-free transfer).',
     render: () => (
       <NudgeBanner nudge={SAMPLE_STATUS_NUDGE} onCta={() => {}} onDismiss={() => {}} />
     ),

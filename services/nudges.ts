@@ -95,7 +95,7 @@ export const CATALOGUE: Nudge[] = [
   {
     id: 'apple_pay_setup',
     touchpoint: 'home_banner',
-    style: 'light-image',
+    style: 'image',
     priority: 100,
     segmentScope: ['S1'],
     showWhen: {
@@ -108,9 +108,9 @@ export const CATALOGUE: Nudge[] = [
     hideWhen: { type: 'flag_true', key: 'apple_pay_active' },
     dismiss: 'escalating',
     content: {
-      headline: 'Setup Apple Pay',
-      body: 'Take your card with you and pay in local currency.',
-      cta: { label: 'Set up', action: 'apple_pay_setup' },
+      headline: 'Tap to pay anywhere',
+      body: 'Set up Apple Pay in a minute. Spend in local currency.',
+      cta: { label: 'Set it up', action: 'apple_pay_setup' },
     },
   },
 
@@ -118,15 +118,15 @@ export const CATALOGUE: Nudge[] = [
   {
     id: 'order_card',
     touchpoint: 'home_banner',
-    style: 'light-image',
+    style: 'image',
     priority: 90,
     segmentScope: ['S1'],
     showWhen: { type: 'flag_false', key: 'has_card' },
     hideWhen: { type: 'flag_true', key: 'has_card' },
     dismiss: 'snooze_3d',
     content: {
-      headline: 'Order your card today',
-      body: 'Spend like a local around the world, wherever Visa is accepted.',
+      headline: 'Spend like a local',
+      body: 'Order your WU card. Use it wherever Visa works.',
       cta: { label: 'Order card', action: 'order_card' },
     },
   },
@@ -135,14 +135,14 @@ export const CATALOGUE: Nudge[] = [
   {
     id: 'add_funds',
     touchpoint: 'home_banner',
-    style: 'light-image',
+    style: 'image',
     priority: 75,
     segmentScope: ['S1'],
     showWhen: { type: 'flag_false', key: 'first_send_done' },
     dismiss: 'session',
     content: {
-      headline: 'Add AUD to start sending',
-      body: 'Fund your account to send money internationally in minutes.',
+      headline: 'Top up to start',
+      body: 'Add AUD now — send overseas in minutes when you’re ready.',
       cta: { label: 'Add money', action: 'add_money' },
     },
   },
@@ -151,16 +151,16 @@ export const CATALOGUE: Nudge[] = [
   {
     id: 'first_jar',
     touchpoint: 'home_banner',
-    style: 'image-bg',
+    style: 'image',
     priority: 65,
     segmentScope: ['S1'],
     showWhen: { type: 'flag_false', key: 'first_jar_created' },
     hideWhen: { type: 'flag_true', key: 'first_jar_created' },
     dismiss: 'session',
     content: {
-      headline: 'Hold JPY, send when ready',
-      body: 'Convert when the rate moves. No fee to hold.',
-      cta: { label: 'Add JPY account', action: 'add_jar' },
+      headline: 'Hold yen for Japan',
+      body: 'Lock in the rate now. No fee while it sits in your jar.',
+      cta: { label: 'Open a jar', action: 'add_jar' },
     },
   },
 
@@ -175,9 +175,9 @@ export const CATALOGUE: Nudge[] = [
     hideWhen: { type: 'flag_true', key: 'wallet_intro_dismissed' },
     dismiss: 'snooze_3d',
     content: {
-      headline: 'Do more with your money.',
-      body: 'Hold currencies, lock in rates, and pay with a WU debit card.',
-      cta: { label: 'Learn more', action: 's7a_value_prop' },
+      headline: 'A wallet you can spend',
+      body: 'Hold currencies. Lock in rates. Tap your WU card overseas.',
+      cta: { label: 'See how', action: 's7a_value_prop' },
     },
   },
 
@@ -185,14 +185,14 @@ export const CATALOGUE: Nudge[] = [
   {
     id: 'value_prop_s7a',
     touchpoint: 'home_banner',
-    style: 'light-image',
+    style: 'image',
     priority: 100,
     segmentScope: ['S7a'],
     showWhen: { type: 'always' },
     dismiss: 'session',
     content: {
-      headline: 'Your money, working harder.',
-      body: 'Hold up to 30 currencies. Convert when the rate is right.',
+      headline: 'Upgrade your account',
+      body: 'Hold 30+ currencies. Time the rate. Spend on your card.',
       cta: { label: 'Get started', action: 's7b_eligibility' },
     },
   },
@@ -207,8 +207,8 @@ export const CATALOGUE: Nudge[] = [
     showWhen: { type: 'always' },
     dismiss: 'permanent', // can't dismiss; only completing the action clears it
     content: {
-      headline: 'We couldn’t verify your identity.',
-      body: 'Try again with updated documents — only takes a few minutes.',
+      headline: 'Verify your ID',
+      body: 'Something didn’t match. Try again with updated docs.',
       cta: { label: 'Try again', action: 'retry_kyc' },
     },
   },
@@ -217,15 +217,15 @@ export const CATALOGUE: Nudge[] = [
   {
     id: 'whats_new_s4',
     touchpoint: 'home_banner',
-    style: 'light-image',
+    style: 'image',
     priority: 100,
     segmentScope: ['S4'],
     showWhen: { type: 'always' },
     dismiss: 'session',
     content: {
-      headline: 'We’ve upgraded your experience.',
-      body: 'Pick up where you left off — verify your identity in a few minutes.',
-      cta: { label: 'Get started', action: 'resume_onboarding' },
+      headline: 'Pick up where you left off',
+      body: 'Finish verifying — a few minutes and you’re set.',
+      cta: { label: 'Continue', action: 'resume_onboarding' },
     },
   },
 
@@ -236,7 +236,7 @@ export const CATALOGUE: Nudge[] = [
   {
     id: 'refer_friend',
     touchpoint: 'home_banner',
-    style: 'light-image',
+    style: 'image',
     priority: 50,
     segmentScope: ['S1'],
     showWhen: {
@@ -249,8 +249,8 @@ export const CATALOGUE: Nudge[] = [
     hideWhen: { type: 'flag_true', key: 'refer_friend_done' },
     dismiss: 'snooze_3d',
     content: {
-      headline: 'Refer a friend, both get $50',
-      body: 'Send them a link. When they make their first transfer, $50 lands in both wallets.',
+      headline: 'You both get $50',
+      body: 'Share your link. Pays out on their first transfer.',
       cta: { label: 'Invite a friend', action: 'refer_friend' },
     },
   },
@@ -265,9 +265,9 @@ export const CATALOGUE: Nudge[] = [
     showWhen: { type: 'always' },
     dismiss: 'session',
     content: {
-      headline: 'Track a transfer.',
+      headline: 'Track a transfer',
       body: 'Got a tracking number? Check the status — no account needed.',
-      cta: { label: 'Track transfer', action: 'track_transfer' },
+      cta: { label: 'Track', action: 'track_transfer' },
     },
   },
 ];

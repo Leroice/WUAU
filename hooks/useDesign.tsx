@@ -31,6 +31,20 @@ export type DesignTokens = {
   heroBtnMarginBottom: number;  // breathing room beneath buttons before the card edge
   heroCollapseRange: number;    // scroll distance over which buttons fade & clip
   heroStretchScale: number;     // max scale at -220pt pull (1.0 = no stretch)
+  // ─── NudgeBanner ────────────────────────────────────────────────────────
+  // All three variants (image, light, status) read these. Tweaking applies
+  // live across the home banner stack and every library preview.
+  nudgeCardH: number;
+  nudgeRadius: number;
+  nudgePad: number;
+  nudgeHeadlineSize: number;
+  nudgeBodySize: number;
+  /** Bottom % of the card covered by the blur layer (image variant). */
+  nudgeBlurPct: number;
+  /** BlurView intensity (image variant). */
+  nudgeBlurAmount: number;
+  /** Max opacity of the gradient scrim at the bottom of the card. */
+  nudgeScrimOpacity: number;
 };
 
 export const DEFAULT_DESIGN: DesignTokens = {
@@ -54,6 +68,14 @@ export const DEFAULT_DESIGN: DesignTokens = {
   heroBtnMarginBottom: 16,
   heroCollapseRange: 60,
   heroStretchScale: 1.16,
+  nudgeCardH: 120,
+  nudgeRadius: 16,
+  nudgePad: 16,
+  nudgeHeadlineSize: 15,
+  nudgeBodySize: 12,
+  nudgeBlurPct: 0.6,
+  nudgeBlurAmount: 14,
+  nudgeScrimOpacity: 0.55,
 };
 
 export type Control =
@@ -118,6 +140,20 @@ export const COMPONENT_LIBRARY: ComponentDef[] = [
       { key: 'heroBtnMarginBottom', label: 'Bottom breathing room', type: 'number', min: 0, max: 32, step: 2 },
       { key: 'heroCollapseRange', label: 'Collapse range', type: 'number', min: 30, max: 200, step: 10 },
       { key: 'heroStretchScale', label: 'Max stretch scale', type: 'number', min: 1, max: 1.4, step: 0.02 },
+    ],
+  },
+  {
+    name: 'Nudge Banner',
+    blurb: 'Home-page nudge cards. Three variants (full-bleed image, light, status). Tweaking applies to the home banner stack + every library preview.',
+    controls: [
+      { key: 'nudgeCardH', label: 'Card height', type: 'number', min: 90, max: 180, step: 4 },
+      { key: 'nudgeRadius', label: 'Corner radius', type: 'number', min: 0, max: 28, step: 2 },
+      { key: 'nudgePad', label: 'Inner padding', type: 'number', min: 8, max: 24, step: 1 },
+      { key: 'nudgeHeadlineSize', label: 'Headline size', type: 'number', min: 12, max: 20, step: 1 },
+      { key: 'nudgeBodySize', label: 'Body size', type: 'number', min: 10, max: 16, step: 1 },
+      { key: 'nudgeBlurPct', label: 'Blur height %', type: 'number', min: 0.3, max: 1, step: 0.05 },
+      { key: 'nudgeBlurAmount', label: 'Blur amount', type: 'number', min: 2, max: 30, step: 2 },
+      { key: 'nudgeScrimOpacity', label: 'Scrim opacity', type: 'number', min: 0, max: 1, step: 0.05 },
     ],
   },
 ];

@@ -9,12 +9,15 @@ import { FlagKey } from './flag';
 //   silent        — never shown; the entry only exists for analytics / a hold
 export type NudgeTouchpoint = 'home_banner' | 'post_action' | 'interstitial' | 'silent';
 
-// Visual treatment. The first three match the Figma NBA-Banner-variants frame:
-//   light-image  — white card, headline + body, image on the right, optional CTA
-//   image-bg     — full-bleed image with dark gradient overlay + text
-//   status       — solid colour background, headline + progress bar (e.g. points)
-//   light        — white card, no image, headline + body + optional CTA (compact)
-export type NudgeStyle = 'light-image' | 'image-bg' | 'status' | 'light';
+// Visual treatment. Three modes — no image-well per the latest Figma direction:
+//   image   — full-bleed image with bottom-aligned blur + scrim under the
+//             text; headline + body + optional CTA bottom-left, X top-right.
+//             This is the default for any nudge with imagery.
+//   light   — white card, no image, headline + body + optional CTA. Used for
+//             text-only nudges (S6 wallet intro, S5b retry, etc).
+//   status  — solid colour background, headline + body + progress bar.
+//             Used for status / progress-style nudges (e.g. points earned).
+export type NudgeStyle = 'image' | 'light' | 'status';
 
 // Rule grammar for show_when / hide_when. Composable so the catalogue stays
 // declarative — `selectNudges` walks the tree without any per-rule branching.
