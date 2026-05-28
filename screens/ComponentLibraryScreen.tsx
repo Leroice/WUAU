@@ -178,24 +178,6 @@ const CATALOG: { name: string; blurb: string; render: (c: Theme) => React.ReactN
       <NudgeBanner nudge={SAMPLE_STATUS_NUDGE} onCta={() => {}} onDismiss={() => {}} />
     ),
   },
-  {
-    name: 'Collapsing Hero',
-    blurb: 'Domain-agnostic sticky hero with collapsing action buttons. Label / amount / subtitle stay pinned; buttons fade and clip against the hero\'s rounded bottom EDGE (overflow:hidden + paddingBottom:0; the wrapper itself does NOT clip). Drive via a reanimated shared scrollY from the parent ScrollView (UI thread). Pair with <CollapsingHeroBacking/> for overscroll-safe surface above.',
-    render: (c) => (
-      <CollapsingHero
-        c={c}
-        label="Available balance"
-        amount="4,280.50 AUD"
-        subtitle="123456 123456789"
-        actions={[
-          { icon: { ios: 'arrow.up', android: 'arrow-upward' }, label: 'Send' },
-          { icon: { ios: 'plus', android: 'add' }, label: 'Add' },
-          { icon: { ios: 'arrow.left.arrow.right', android: 'swap-horiz' }, label: 'Convert' },
-          { icon: { ios: 'ellipsis', android: 'more-horiz' }, label: 'More' },
-        ]}
-      />
-    ),
-  },
 ];
 
 // Live preview for each component, rendered with the current tokens.
@@ -241,9 +223,69 @@ function Preview({ name, c }: { name: string; c: Theme }) {
           </View>
         </View>
       );
+    case 'Collapsing Hero':
+      return <CollapsingHeroVariants c={c} />;
     default:
       return null;
   }
+}
+
+// Three live variants stacked. Tokens above apply to all three.
+function CollapsingHeroVariants({ c }: { c: Theme }) {
+  return (
+    <View style={{ gap: 16 }}>
+      <Text style={[styles.variantLabel, { color: c.muted }]}>Accounts overview · text-only, locked collapse, stretch-on-pull</Text>
+      <CollapsingHero
+        c={c}
+        label="Total balance"
+        amount="5,966.90 AUD"
+        collapseOnScroll={false}
+        stretchOnPull
+        actions={[
+          { icon: { ios: 'plus', android: 'add' }, label: 'Add' },
+          { icon: { ios: 'arrow.left.arrow.right', android: 'swap-horiz' }, label: 'Convert' },
+        ]}
+      />
+
+      <Text style={[styles.variantLabel, { color: c.muted }]}>Account detail · with subtitle, default collapse</Text>
+      <CollapsingHero
+        c={c}
+        label="Available balance"
+        amount="4,280.50 AUD"
+        subtitle="123456 123456789"
+        actions={[
+          { icon: { ios: 'arrow.up', android: 'arrow-upward' }, label: 'Send' },
+          { icon: { ios: 'plus', android: 'add' }, label: 'Add' },
+          { icon: { ios: 'arrow.left.arrow.right', android: 'swap-horiz' }, label: 'Convert' },
+          { icon: { ios: 'ellipsis', android: 'more-horiz' }, label: 'More' },
+        ]}
+      />
+
+      <Text style={[styles.variantLabel, { color: c.muted }]}>Jar detail · headline + extras chip, stretch-on-pull</Text>
+      <CollapsingHero
+        c={c}
+        label="Available balance"
+        amount="1,800.56 AUD"
+        subtitle="Goal 13,000.00 AUD (14%)"
+        headline={
+          <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: c.pill, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontSize: 36 }}>💍</Text>
+          </View>
+        }
+        extras={
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: c.pill }}>
+            <Text style={{ fontSize: 12, fontWeight: '500', color: c.text }}>📅 Target date: 01/09/2026</Text>
+          </View>
+        }
+        stretchOnPull
+        actions={[
+          { icon: { ios: 'plus', android: 'add' }, label: 'Add' },
+          { icon: { ios: 'arrow.left.arrow.right', android: 'swap-horiz' }, label: 'Convert' },
+          { icon: { ios: 'ellipsis', android: 'more-horiz' }, label: 'More' },
+        ]}
+      />
+    </View>
+  );
 }
 
 function ControlRow({ c, control }: { c: Theme; control: Control }) {
@@ -426,6 +468,7 @@ const styles = StyleSheet.create({
   miniVisa: { fontSize: 18, fontWeight: '800', fontStyle: 'italic', color: '#000000' },
   json: { fontFamily: 'Courier', fontSize: 12, padding: 12, borderRadius: 12, lineHeight: 18 },
   logBtn: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 8 },
+  variantLabel: { fontSize: 11, fontWeight: '600', letterSpacing: 0.4, textTransform: 'uppercase' },
   storyEntry: { borderRadius: 16, padding: 16, gap: 6 },
   storyEntryTitle: { fontSize: 18, fontWeight: '700', color: '#000000' },
   storyEntryBody: { fontSize: 13, lineHeight: 18, color: '#000000', opacity: 0.85 },
