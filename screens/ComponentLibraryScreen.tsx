@@ -7,6 +7,7 @@ import { Surface, WidgetCard, ListRow, ActionButton, SectionHeader, StatusDot, C
 import { ConverterWidget, CurrencySelector } from '../components/ConverterWidget';
 import { CollapsingHero } from '../components/CollapsingHero';
 import { NudgeBanner } from '../components/NudgeBanner';
+import { DismissibleSlot } from '../components/DismissibleSlot';
 import { SystemIcon } from '../components/SystemIcon';
 import { usePersona, PERSONAS } from '../hooks/usePersona';
 import type { Nudge } from '../types';
@@ -162,6 +163,11 @@ const CATALOG: { name: string; blurb: string; render: (c: Theme) => React.ReactN
       <NudgeBanner nudge={SAMPLE_STATUS_NUDGE} onCta={() => {}} onDismiss={() => {}} />
     ),
   },
+  {
+    name: 'Dismissible Slot',
+    blurb: 'Library primitive: wraps any card and collapses its height + opacity to zero on dismiss, letting content below slide up smoothly. Same animation used on the Cards-screen Apple Pay banner — now reused by the home nudge deck. Tap the demo to dismiss it.',
+    render: (c) => <DismissibleSlotPreview c={c} />,
+  },
 ];
 
 // Live preview for each component, rendered with the current tokens.
@@ -212,6 +218,32 @@ function Preview({ name, c }: { name: string; c: Theme }) {
     default:
       return null;
   }
+}
+
+// DismissibleSlot demo — tap the card to play the collapse animation.
+function DismissibleSlotPreview({ c }: { c: Theme }) {
+  const [dismissed, setDismissed] = useState(false);
+  return (
+    <View style={{ gap: 8 }}>
+      <DismissibleSlot
+        dismissed={dismissed}
+        onCollapsed={() => setTimeout(() => setDismissed(false), 600)}
+      >
+        <Pressable
+          onPress={() => setDismissed(true)}
+          style={{ height: 80, borderRadius: 14, backgroundColor: WU_YELLOW, alignItems: 'center', justifyContent: 'center' }}
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss demo card"
+        >
+          <Text style={{ fontSize: 14, fontWeight: '700', color: '#000000' }}>Tap to dismiss</Text>
+          <Text style={{ fontSize: 11, color: '#000000', opacity: 0.75 }}>resets after 600ms</Text>
+        </Pressable>
+      </DismissibleSlot>
+      <View style={{ height: 60, borderRadius: 14, backgroundColor: c.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: c.border, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: 12, color: c.muted }}>Sibling — watch this slide up</Text>
+      </View>
+    </View>
+  );
 }
 
 // Three live variants stacked. Tokens above apply to all three.

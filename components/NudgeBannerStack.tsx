@@ -1,7 +1,8 @@
-import React, { useCallback } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useTheme } from '../constants/theme';
 import { NudgeBanner } from './NudgeBanner';
+import { DismissibleSlot } from './DismissibleSlot';
 import { useNudges } from '../hooks/useNudges';
 import { useNudgeActions } from '../hooks/useNudgeActions';
 import type { FlagKey, Nudge } from '../types';
@@ -28,24 +29,38 @@ const PEEK_SCALE = 0.97;
 /**
  * NudgeBannerStack — the Home-page nudge deck. Up to two cards stacked; the
  * back card peeks ~8pt below + 0.97 scaled so it reads as "there's one more
- * after this." Dismiss (X) on the top card promotes the back card; the engine
- * supplies the next in priority for the back slot.
+ * after this." Dismiss (X) on the top card animates the slot to zero height
+ * (DismissibleSlot — same primitive as the Cards-screen Apple Pay banner) so
+ * everything below slides up smoothly. Once the collapse completes, the
+ * engine drops the entry; the next priority pick promotes to the front and
+ * the next-after becomes the new peeked back.
  *
- * Pagination dots underneath show 1/2 or 2/2. No swipe — the user's spec is
- * tap-to-dismiss reveals next. Pass `style` to add outer margins.
+ * Pagination dots underneath show position. Pass `style` to add outer margins.
  */
 export function NudgeBannerStack({ style }: { style?: any }) {
   const c = useTheme();
   const nudges = useNudges('home_banner'); // engine already caps at 2
   const { dismiss, setFlag } = useNudgeActions();
 
+  // Local dismiss state — the slot animates while we hold the engine's
+  // dismiss() until the collapse finishes. Otherwise the nudge would vanish
+  // instantly and the slot wouldn't be able to play its exit.
+  const [dismissingId, setDismissingId] = useState<string | null>(null);
+
   const handleCta = useCallback((n: Nudge) => {
-    // Demo behaviour: flip the matching flag so the queue advances. In a real
-    // build, this also navigates (e.g. open the Apple Pay setup sheet).
     const action = n.content.cta?.action;
     const flag = action ? CTA_FLAG_MAP[action] : undefined;
     if (flag) setFlag(flag, true);
   }, [setFlag]);
+
+  const handleDismiss = useCallback((n: Nudge) => {
+    setDismissingId(n.id);
+  }, []);
+
+  const onCollapsed = useCallback((n: Nudge) => {
+    dismiss(n.id, n.dismiss);
+    setDismissingId(null);
+  }, [dismiss]);
 
   if (nudges.length === 0) return null;
 
@@ -60,11 +75,17 @@ export function NudgeBannerStack({ style }: { style?: any }) {
             <NudgeBanner nudge={back} />
           </View>
         )}
-        <NudgeBanner
-          nudge={front}
-          onCta={() => handleCta(front)}
-          onDismiss={() => dismiss(front.id, front.dismiss)}
-        />
+        <DismissibleSlot
+          dismissed={dismissingId === front.id}
+          onCollapsed={() => onCollapsed(front)}
+          remeasureKey={front.id}
+        >
+          <NudgeBanner
+            nudge={front}
+            onCta={() => handleCta(front)}
+            onDismiss={() => handleDismiss(front)}
+          />
+        </DismissibleSlot>
       </View>
       {nudges.length > 1 && (
         <View style={styles.dots}>
