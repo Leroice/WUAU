@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, StyleProp, ViewStyle, TextStyle, useColorScheme, Animated, Easing } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
-import { Squishy } from '../Squishy';
-import { SystemIcon, IconSpec } from '../SystemIcon';
-import { Theme, WU_YELLOW, SPACING, RADIUS } from '../theme';
-import { useDesign } from '../DesignContext';
+import { Squishy } from './Squishy';
+import { SystemIcon, IconSpec } from './SystemIcon';
+import { Theme, WU_YELLOW, SPACING, RADIUS } from '../constants/theme';
+import { useDesign } from '../hooks/useDesign';
 
 /**
  * Canonical widget-header title type — the "Send Money" style. Shared by every
@@ -356,7 +356,7 @@ export function SegmentedControl({
 
 /**
  * Transaction list row — icon circle + title/subtitle + amount (+ optional
- * status dot). Shared by the account and stack detail screens.
+ * status dot). Shared by the account and jar detail screens.
  */
 export function TransactionRow({
   c, icon, title, sub, amount, positive, status,
