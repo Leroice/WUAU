@@ -19,6 +19,18 @@ export type DesignTokens = {
   actionIcon: number;
   actionLabelSize: number;
   cardRadius: number;
+  // ─── CollapsingHero ─────────────────────────────────────────────────────
+  // All three balance-card screens (Accounts, AccountDetail, JarDetail) read
+  // these. Tweaking any value updates every CollapsingHero instance live.
+  heroPadTop: number;
+  heroLabelSize: number;
+  heroAmountSize: number;
+  heroRefSize: number;
+  heroBtnRowH: number;
+  heroBtnMarginTop: number;     // gap between text block (or extras) and buttons
+  heroBtnMarginBottom: number;  // breathing room beneath buttons before the card edge
+  heroCollapseRange: number;    // scroll distance over which buttons fade & clip
+  heroStretchScale: number;     // max scale at -220pt pull (1.0 = no stretch)
 };
 
 export const DEFAULT_DESIGN: DesignTokens = {
@@ -33,6 +45,15 @@ export const DEFAULT_DESIGN: DesignTokens = {
   actionIcon: 24,
   actionLabelSize: 12,
   cardRadius: 14,
+  heroPadTop: 8,
+  heroLabelSize: 14,
+  heroAmountSize: 32,
+  heroRefSize: 12,
+  heroBtnRowH: 60,
+  heroBtnMarginTop: 24,
+  heroBtnMarginBottom: 16,
+  heroCollapseRange: 60,
+  heroStretchScale: 1.16,
 };
 
 export type Control =
@@ -82,6 +103,21 @@ export const COMPONENT_LIBRARY: ComponentDef[] = [
     blurb: 'The card hero. Flips on tap and floats with the gyro.',
     controls: [
       { key: 'cardRadius', label: 'Corner radius', type: 'number', min: 0, max: 28, step: 2 },
+    ],
+  },
+  {
+    name: 'Collapsing Hero',
+    blurb: 'The shared header on Accounts, Account detail, and Jar detail. Tweak any value and all three screens update live.',
+    controls: [
+      { key: 'heroPadTop', label: 'Top padding', type: 'number', min: 0, max: 24, step: 1 },
+      { key: 'heroLabelSize', label: 'Label size', type: 'number', min: 10, max: 20, step: 1 },
+      { key: 'heroAmountSize', label: 'Amount size', type: 'number', min: 20, max: 56, step: 2 },
+      { key: 'heroRefSize', label: 'Subtitle size', type: 'number', min: 9, max: 18, step: 1 },
+      { key: 'heroBtnRowH', label: 'Button row height', type: 'number', min: 40, max: 80, step: 2 },
+      { key: 'heroBtnMarginTop', label: 'Gap above buttons', type: 'number', min: 0, max: 48, step: 2 },
+      { key: 'heroBtnMarginBottom', label: 'Bottom breathing room', type: 'number', min: 0, max: 32, step: 2 },
+      { key: 'heroCollapseRange', label: 'Collapse range', type: 'number', min: 30, max: 200, step: 10 },
+      { key: 'heroStretchScale', label: 'Max stretch scale', type: 'number', min: 1, max: 1.4, step: 0.02 },
     ],
   },
 ];

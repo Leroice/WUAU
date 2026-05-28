@@ -4,12 +4,10 @@ import Animated, {
   SharedValue, useAnimatedStyle, useSharedValue, interpolate, Extrapolation,
 } from 'react-native-reanimated';
 import { Theme } from '../constants/theme';
+import { useDesign } from '../hooks/useDesign';
 import { ActionButton } from './ui';
 
-const BTN_ROW_H = 60;
-const COLLAPSE = 60;         // scroll distance over which buttons fade & collapse
-const STRETCH_RANGE = 220;   // pull-down distance to reach max scale
-const STRETCH_SCALE = 1.16;  // max scale on full pull-down
+const STRETCH_RANGE = 220;   // pull-down distance to reach max scale (token: heroStretchScale controls the magnitude)
 
 export type HeroAction = {
   icon: { ios: string; android: string };
@@ -86,6 +84,13 @@ export function CollapsingHero({
   collapseOnScroll = true,
   stretchOnPull = false,
 }: CollapsingHeroProps) {
+  const { tokens } = useDesign();
+  // Pull token values out so the worklets capture stable primitives.
+  const btnRowH = tokens.heroBtnRowH;
+  const btnMarginTop = tokens.heroBtnMarginTop;
+  const collapseRange = tokens.heroCollapseRange;
+  const stretchScale = tokens.heroStretchScale;
+
   // Worklets need stable shape; fall back to a local SharedValue when the
   // caller doesn't drive the collapse (e.g. library previews).
   const fallback = useSharedValue(0);
@@ -94,23 +99,23 @@ export function CollapsingHero({
   // Button row: optional collapse on scroll (positive scrollY).
   const buttonsStyle = useAnimatedStyle(() => {
     if (!collapseOnScroll) {
-      return { opacity: 1, height: BTN_ROW_H, marginTop: 24 };
+      return { opacity: 1, height: btnRowH, marginTop: btnMarginTop };
     }
     return {
-      opacity: interpolate(sy.value, [0, COLLAPSE], [1, 0], Extrapolation.CLAMP),
-      height: interpolate(sy.value, [0, COLLAPSE], [BTN_ROW_H, 0], Extrapolation.CLAMP),
-      marginTop: interpolate(sy.value, [0, COLLAPSE], [24, 0], Extrapolation.CLAMP),
+      opacity: interpolate(sy.value, [0, collapseRange], [1, 0], Extrapolation.CLAMP),
+      height: interpolate(sy.value, [0, collapseRange], [btnRowH, 0], Extrapolation.CLAMP),
+      marginTop: interpolate(sy.value, [0, collapseRange], [btnMarginTop, 0], Extrapolation.CLAMP),
     };
-  }, [collapseOnScroll]);
+  }, [collapseOnScroll, btnRowH, btnMarginTop, collapseRange]);
 
   // Content block (headline + label + amount + subtitle): optional stretch on
   // pull (negative scrollY). Buttons stay static — they don't scale.
   const contentStretch = useAnimatedStyle(() => {
     const scale = stretchOnPull
-      ? interpolate(sy.value, [-STRETCH_RANGE, 0], [STRETCH_SCALE, 1], Extrapolation.CLAMP)
+      ? interpolate(sy.value, [-STRETCH_RANGE, 0], [stretchScale, 1], Extrapolation.CLAMP)
       : 1;
     return { transform: [{ scale }] };
-  }, [stretchOnPull]);
+  }, [stretchOnPull, stretchScale]);
 
   // With a headline present, stretch applies only to the headline (matches
   // the doughnut-pull-up gesture). Without a headline, stretch applies to the
@@ -120,18 +125,18 @@ export function CollapsingHero({
   const textStretch = hasHeadline ? undefined : contentStretch;
 
   return (
-    <View style={[styles.hero, { backgroundColor: c.surface }]}>
+    <View style={[styles.hero, { backgroundColor: c.surface, paddingTop: tokens.heroPadTop }]}>
       {headline ? (
         <Animated.View style={[styles.headlineSlot, headlineStretch]}>{headline}</Animated.View>
       ) : null}
       <Animated.View style={textStretch}>
-        <Text style={[styles.heroLabel, { color: c.muted }]}>{label}</Text>
-        <Text style={[styles.heroAmount, { color: c.text }]}>{amount}</Text>
-        {subtitle ? <Text style={[styles.heroRef, { color: c.muted }]}>{subtitle}</Text> : null}
+        <Text style={[styles.heroLabel, { color: c.muted, fontSize: tokens.heroLabelSize }]}>{label}</Text>
+        <Text style={[styles.heroAmount, { color: c.text, fontSize: tokens.heroAmountSize }]}>{amount}</Text>
+        {subtitle ? <Text style={[styles.heroRef, { color: c.muted, fontSize: tokens.heroRefSize }]}>{subtitle}</Text> : null}
       </Animated.View>
       {extras ? <View style={styles.extrasSlot}>{extras}</View> : null}
-      <Animated.View style={[styles.heroButtonsWrap, buttonsStyle]}>
-        <View style={styles.heroButtons}>
+      <Animated.View style={[styles.heroButtonsWrap, { marginBottom: tokens.heroBtnMarginBottom }, buttonsStyle]}>
+        <View style={[styles.heroButtons, { height: btnRowH }]}>
           {actions.map((a, i) => (
             <ActionButton key={i} icon={a.icon} label={a.label} onPress={a.onPress} />
           ))}
@@ -160,9 +165,9 @@ const styles = StyleSheet.create({
   // Hero: paddingBottom:0 + overflow:hidden so the rounded bottom edge IS the
   // mask. The button-row wrapper below sits flush with that edge; when it
   // shrinks the buttons disappear into the edge of the card, not inner padding.
+  // paddingTop is driven by tokens.heroPadTop (applied inline)
   hero: {
     paddingHorizontal: 16,
-    paddingTop: 8,
     paddingBottom: 0,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -170,9 +175,10 @@ const styles = StyleSheet.create({
   },
   headlineSlot: { alignItems: 'center', marginBottom: 12 },
   extrasSlot: { alignItems: 'center', marginTop: 12 },
-  heroLabel: { fontSize: 14, fontWeight: '500', textAlign: 'center', marginBottom: 8 },
-  heroAmount: { fontSize: 32, fontFamily: 'PPRightGrotesk-WideMedium', textAlign: 'center' },
-  heroRef: { fontSize: 12, fontWeight: '500', marginTop: 4, textAlign: 'center' },
+  // Font sizes driven by tokens (applied inline); weights / family / alignment stay here.
+  heroLabel: { fontWeight: '500', textAlign: 'center', marginBottom: 8 },
+  heroAmount: { fontFamily: 'PPRightGrotesk-WideMedium', textAlign: 'center' },
+  heroRef: { fontWeight: '500', marginTop: 4, textAlign: 'center' },
   // Wrapper collapses (height + marginTop + opacity all on UI thread). The row
   // itself stays a static 60pt — no per-frame layout on the buttons. The
   // wrapper has NO overflow:hidden — that would clip the buttons 16pt above
@@ -181,6 +187,7 @@ const styles = StyleSheet.create({
   // the actual clipper is the HERO's overflow:hidden — i.e. the rounded bottom
   // edge of the card. marginBottom stays static 16 so the balance always has
   // 16pt of breathing room above that edge, including when fully collapsed.
-  heroButtonsWrap: { width: '100%', marginBottom: 16 },
-  heroButtons: { flexDirection: 'row', gap: 8, height: BTN_ROW_H, width: '100%' },
+  // marginBottom + button height driven by tokens (applied inline).
+  heroButtonsWrap: { width: '100%' },
+  heroButtons: { flexDirection: 'row', gap: 8, width: '100%' },
 });
