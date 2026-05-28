@@ -16,6 +16,7 @@ import { ActionButton, WidgetCard, Carousel, CarouselCard, CAROUSEL_CARD_W, Head
 import { ParticleBalance } from '../components/ParticleBalance';
 import { Squishy } from '../components/Squishy';
 import { ConverterWidget } from '../components/ConverterWidget';
+import { NudgeBannerStack } from '../components/NudgeBannerStack';
 import { usePersona } from '../hooks/usePersona';
 import { WU_YELLOW } from '../constants/theme';
 import { HOME, QUICK_ACTIONS } from '../services/content';
@@ -190,6 +191,9 @@ export function HomeScreen({ navigation }: any) {
           ))}
         </View>
 
+        {/* NUDGE BANNER STACK — up to 2 active nudges, dismiss-to-next */}
+        <NudgeBannerStack style={styles.nudges} />
+
         {/* SEND MONEY — currency converter widget */}
         <ConverterWidget style={styles.widget} navigation={navigation} />
 
@@ -297,6 +301,7 @@ const styles = StyleSheet.create({
     height: 60,
   },
   widget: { marginHorizontal: 16, marginBottom: 16 },
+  nudges: { marginHorizontal: 16, marginBottom: 24 },
   avatar: {
     width: 40,
     height: 40,
