@@ -330,11 +330,12 @@ export function ComponentLibraryScreen({ navigation }: any) {
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
     >
-      {/* Scenario — demo persona switcher (relocated here from the Settings panel) */}
+      {/* Scenario — demo persona switcher. Now segment-aware: each chip surfaces
+          the migration segment underneath the label so the journey is obvious. */}
       <View style={styles.block}>
         <Text style={[styles.blockName, { color: c.text }]}>Scenario</Text>
         <Text style={[styles.blockBlurb, { color: c.muted }]}>
-          Switch the demo persona — reshapes balances, accounts, contacts and transactions across the app.
+          Switch the demo persona — reshapes balances, accounts, contacts, transactions, and the nudge queue. Persona switch resets nudge dismissals (clean slate per scenario).
         </Text>
         <View style={styles.personaRow}>
           {PERSONAS.map((p) => {
@@ -348,6 +349,7 @@ export function ComponentLibraryScreen({ navigation }: any) {
                 accessibilityState={{ selected: active }}
               >
                 <Text style={[styles.personaLabel, { color: active ? '#000000' : c.text }]}>{p.label}</Text>
+                <Text style={[styles.personaSegment, { color: active ? '#000000' : c.muted }]}>{p.segment} · {p.walletStatus}</Text>
               </Pressable>
             );
           })}
@@ -411,8 +413,9 @@ const styles = StyleSheet.create({
   json: { fontFamily: 'Courier', fontSize: 12, padding: 12, borderRadius: 12, lineHeight: 18 },
   logBtn: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 8 },
   personaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
-  personaChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth },
+  personaChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 2 },
   personaLabel: { fontSize: 14, fontWeight: '600' },
+  personaSegment: { fontSize: 11, fontWeight: '500', letterSpacing: 0.2 },
   personaBlurb: { fontSize: 13, marginTop: 8, lineHeight: 18 },
 });
 

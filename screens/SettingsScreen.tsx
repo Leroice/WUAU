@@ -12,7 +12,7 @@ import { SETTINGS } from '../services/content';
 import { Squishy } from '../components/Squishy';
 import { SystemIcon } from '../components/SystemIcon';
 import { WU_YELLOW } from '../constants/theme';
-import { usePersona } from '../hooks/usePersona';
+import { usePersona, PERSONAS } from '../hooks/usePersona';
 
 type IconSpec = { ios: string; android: string };
 
@@ -86,7 +86,7 @@ export function SettingsScreen({ navigation }: any) {
   const dark = scheme === 'dark';
   const c = dark ? DARK : LIGHT;
   const insets = useSafeAreaInsets();
-  const { persona } = usePersona();
+  const { persona, setPersona } = usePersona();
   const user = persona.user;
 
   return (
@@ -95,16 +95,47 @@ export function SettingsScreen({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: insets.bottom + 40 }}
       >
-        {/* Profile summary — flat, no box */}
+        {/* Profile summary — flat, no box. Shows current segment as a chip
+            next to the name so the active scenario is obvious. */}
         <View style={styles.userHeader}>
           <View style={[styles.userAvatar, { backgroundColor: WU_YELLOW }]}>
             <Text style={styles.userAvatarText}>{user.initials}</Text>
           </View>
-          <View>
-            <Text style={[styles.userName, { color: c.text }]}>{user.firstName} {user.lastName}</Text>
+          <View style={{ flex: 1 }}>
+            <View style={styles.userNameRow}>
+              <Text style={[styles.userName, { color: c.text }]}>{user.firstName} {user.lastName}</Text>
+              <View style={[styles.segmentBadge, { backgroundColor: c.pill }]}>
+                <Text style={[styles.segmentBadgeText, { color: c.text }]}>{persona.segment}</Text>
+              </View>
+            </View>
             <Text style={[styles.userLocation, { color: c.muted }]}>{user.location}</Text>
           </View>
         </View>
+
+        {/* Quick scenario picker — horizontal scroll of personas. Two taps from
+            anywhere in the app: drawer-swipe + chip-tap. Tapping a chip flips
+            the persona (and resets nudge dismissals via NudgeProvider). */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.scenarioRow}
+        >
+          {PERSONAS.map((p) => {
+            const active = p.id === persona.id;
+            return (
+              <Pressable
+                key={p.id}
+                onPress={() => setPersona(p.id)}
+                style={[styles.scenarioChip, { backgroundColor: active ? WU_YELLOW : c.card, borderColor: active ? WU_YELLOW : c.border }]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+              >
+                <Text style={[styles.scenarioLabel, { color: active ? '#000000' : c.text }]} numberOfLines={1}>{p.label}</Text>
+                <Text style={[styles.scenarioSegment, { color: active ? '#000000' : c.muted }]}>{p.segment}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
 
         {/* Menu — icon + label rows only. App settings leads to the design/demo
             screen, which now also hosts the Scenario switcher. */}
@@ -171,8 +202,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   userAvatarText: { fontSize: 18, fontWeight: '700', color: '#000000' },
-  userName: { fontSize: 16, fontWeight: '600', marginBottom: 2 },
+  userNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 },
+  userName: { fontSize: 16, fontWeight: '600' },
+  segmentBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  segmentBadgeText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.4 },
   userLocation: { fontSize: 13 },
+  scenarioRow: { paddingHorizontal: 20, paddingBottom: 16, gap: 8 },
+  scenarioChip: {
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth, gap: 1, minWidth: 92,
+  },
+  scenarioLabel: { fontSize: 13, fontWeight: '600' },
+  scenarioSegment: { fontSize: 10, fontWeight: '500', letterSpacing: 0.3 },
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
