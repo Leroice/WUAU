@@ -6,10 +6,52 @@ import { useDesign, COMPONENT_LIBRARY, WEIGHTS, ComponentDef, Control, DesignTok
 import { Surface, WidgetCard, ListRow, ActionButton, SectionHeader, StatusDot, Carousel, CarouselCard, SegmentedControl, TransactionRow, HeaderIconButton, HeaderLogo } from '../components/ui';
 import { ConverterWidget, CurrencySelector } from '../components/ConverterWidget';
 import { CollapsingHero } from '../components/CollapsingHero';
+import { NudgeBanner } from '../components/NudgeBanner';
 import { SystemIcon } from '../components/SystemIcon';
 import { usePersona, PERSONAS } from '../hooks/usePersona';
+import type { Nudge } from '../types';
 
 const SAMPLE_ICON = { ios: 'star.fill', android: 'star' };
+
+// ─── Sample nudges for the four banner variants ──────────────────────────────
+// Used by the library previews only — the live catalogue lives in services/nudges.ts.
+const SAMPLE_LIGHT_IMAGE_NUDGE: Nudge = {
+  id: 'preview_light_image', touchpoint: 'home_banner', style: 'light-image', priority: 0,
+  segmentScope: ['S1'], showWhen: { type: 'always' }, dismiss: 'session',
+  content: {
+    headline: 'Setup Apple Pay',
+    body: 'Take your card with you and pay in local currency.',
+    cta: { label: 'Set up' },
+  },
+};
+const SAMPLE_LIGHT_NUDGE: Nudge = {
+  id: 'preview_light', touchpoint: 'home_banner', style: 'light', priority: 0,
+  segmentScope: ['S6'], showWhen: { type: 'always' }, dismiss: 'session',
+  content: {
+    headline: 'Do more with your money.',
+    body: 'Hold currencies, lock in rates, and pay with a WU debit card.',
+    cta: { label: 'Learn more' },
+  },
+};
+const SAMPLE_IMAGE_BG_NUDGE: Nudge = {
+  id: 'preview_image_bg', touchpoint: 'home_banner', style: 'image-bg', priority: 0,
+  segmentScope: ['S1'], showWhen: { type: 'always' }, dismiss: 'session',
+  content: {
+    headline: 'Hold JPY, send when ready',
+    body: 'Convert when the rate moves. No fee to hold.',
+    cta: { label: 'Add JPY account' },
+  },
+};
+const SAMPLE_STATUS_NUDGE: Nudge = {
+  id: 'preview_status', touchpoint: 'home_banner', style: 'status', priority: 0,
+  segmentScope: ['S1'], showWhen: { type: 'always' }, dismiss: 'session',
+  content: {
+    headline: '60 points earned!',
+    body: '180 points until fee-free transfer',
+    progress: 0.25,
+    bgColor: '#106B4F',
+  },
+};
 
 // Stateful preview wrapper for the segmented control.
 function SegmentedPreview({ c }: { c: Theme }) {
@@ -107,6 +149,34 @@ const CATALOG: { name: string; blurb: string; render: (c: Theme) => React.ReactN
     name: 'Send Money Converter',
     blurb: 'The Home converter widget — flip reverses flow (animated), live rate conversion, currency picker.',
     render: () => <ConverterWidget />,
+  },
+  {
+    name: 'Nudge Banner — light-image',
+    blurb: 'Default nudge card: white surface, headline + body + optional yellow CTA on the left, image (or placeholder) on the right, X close top-right. Figma NBA-Banner-variants. 120pt tall.',
+    render: () => (
+      <NudgeBanner nudge={SAMPLE_LIGHT_IMAGE_NUDGE} onCta={() => {}} onDismiss={() => {}} />
+    ),
+  },
+  {
+    name: 'Nudge Banner — light',
+    blurb: 'White card without an image — just headline + body + optional CTA. Used for the S6 wallet intro / S5b retry banners where image isn\'t the point.',
+    render: () => (
+      <NudgeBanner nudge={SAMPLE_LIGHT_NUDGE} onCta={() => {}} onDismiss={() => {}} />
+    ),
+  },
+  {
+    name: 'Nudge Banner — image-bg',
+    blurb: 'Full-bleed image with dark scrim and white text overlaid. Used for jar/holiday nudges where the imagery sells the moment.',
+    render: () => (
+      <NudgeBanner nudge={SAMPLE_IMAGE_BG_NUDGE} onCta={() => {}} onDismiss={() => {}} />
+    ),
+  },
+  {
+    name: 'Nudge Banner — status',
+    blurb: 'Solid colour, headline + small body + progress bar. Used for status / progress-style nudges (e.g. fee-free transfer threshold).',
+    render: () => (
+      <NudgeBanner nudge={SAMPLE_STATUS_NUDGE} onCta={() => {}} onDismiss={() => {}} />
+    ),
   },
   {
     name: 'Collapsing Hero',
