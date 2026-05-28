@@ -112,7 +112,7 @@ export function StackDetailScreen({ navigation, route }: any) {
             so a top bounce never reveals a gap. */}
         <View style={{ position: 'absolute', top: -800, left: 0, right: 0, height: 800, backgroundColor: c.surface }} />
 
-        {/* Hero — scrolls with the list; the doughnut stretches on pull-down. */}
+        {/* Hero — flush under the native nav bar (same surface colour). */}
         <View style={[styles.hero, { backgroundColor: c.surface }]}>
           <View style={{ width: innerW, alignItems: 'center' }}>
             <Animated.View style={{ transform: [{ scale: heroScale }] }}>

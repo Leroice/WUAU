@@ -1,13 +1,13 @@
-import React, { useLayoutEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
+import React, { useLayoutEffect } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../constants/theme';
 import { SystemIcon } from '../components/SystemIcon';
-import { ActionButton, TransactionRow } from '../components/ui';
+import { TransactionRow } from '../components/ui';
+import { CollapsingHero, CollapsingHeroBacking } from '../components/CollapsingHero';
 import { ACCOUNT_DETAIL, ACCOUNT_MORE } from '../services/content';
 import { useAccountDetail } from '../hooks/useAccountDetail';
-
-const BTN_ROW_H = 60;
 
 // Close (✕) bar button — dismisses the whole accounts flow back to Home.
 function closeButton(navigation: any, color: string) {
@@ -20,9 +20,12 @@ function closeButton(navigation: any, color: string) {
 
 /**
  * Account detail (Figma 5-20465 / 5-20600 / 5-20556). Native nav bar (back + ✕)
- * over a sticky hero that collapses on scroll — the action buttons fade and
- * collapse away, revealing more of the date-grouped transaction list. "More"
- * opens a native bottom sheet.
+ * over a <CollapsingHero/> wired sticky: balance/label/ref stay pinned, the
+ * action-button row fades + collapses against the hero's rounded bottom edge,
+ * and transactions scroll up BEHIND the hero (sticky headers sit above sibling
+ * content in the z-stack). The companion <CollapsingHeroBacking/> keeps the
+ * surface colour above the hero on overscroll. All animation runs on the UI
+ * thread via reanimated, so Android stays smooth.
  */
 export function AccountDetailScreen({ navigation, route }: any) {
   const c = useTheme();
@@ -30,43 +33,48 @@ export function AccountDetailScreen({ navigation, route }: any) {
   const code: string = route?.params?.code ?? 'AUD';
   const amount: string = route?.params?.amount ?? '0.00';
   const { txns: sections, isLoading } = useAccountDetail(code);
-  const scrollY = useRef(new Animated.Value(0)).current;
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: code, headerRight: () => closeButton(navigation, c.text) });
   }, [navigation, c, code]);
 
-  // Hero buttons fade + collapse over the first 60pt of scroll.
-  const btnOpacity = scrollY.interpolate({ inputRange: [0, 60], outputRange: [1, 0], extrapolate: 'clamp' });
-  const btnHeight = scrollY.interpolate({ inputRange: [0, 60], outputRange: [BTN_ROW_H, 0], extrapolate: 'clamp' });
-  const btnGap = scrollY.interpolate({ inputRange: [0, 60], outputRange: [24, 0], extrapolate: 'clamp' });
-
   const openMore = () => navigation.navigate('AccountMore', { code });
+
+  // UI-thread scroll tracking — passed into the header so its collapse worklets
+  // read scrollY directly (no JS-bridge crossings per frame).
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[0]}
+        onScroll={onScroll}
         scrollEventThrottle={16}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
         contentInsetAdjustmentBehavior="automatic"
       >
-        {/* sticky, collapsing hero */}
-        <View style={[styles.hero, { backgroundColor: c.surface }]}>
-          <Text style={[styles.heroLabel, { color: c.muted }]}>{ACCOUNT_DETAIL.availableLabel}</Text>
-          <Text style={[styles.heroAmount, { color: c.text }]}>{amount} {code}</Text>
-          <Text style={[styles.heroRef, { color: c.muted }]}>{ACCOUNT_DETAIL.accountRef}</Text>
-          <Animated.View style={{ opacity: btnOpacity, height: btnHeight, marginTop: btnGap, width: '100%', overflow: 'hidden' }}>
-            <View style={styles.heroButtons}>
-              <ActionButton icon={{ ios: 'arrow.up', android: 'arrow-upward' }} label="Send" />
-              <ActionButton icon={{ ios: 'plus', android: 'add' }} label="Add" />
-              <ActionButton icon={{ ios: 'arrow.left.arrow.right', android: 'swap-horiz' }} label="Convert" />
-              <ActionButton icon={{ ios: 'ellipsis', android: 'more-horiz' }} label="More" onPress={openMore} />
-            </View>
-          </Animated.View>
-        </View>
+        {/* Sticky hero — index 0. Brings it to the top of the z-stack and
+            pins it under the nav bar. */}
+        <CollapsingHero
+          c={c}
+          label={ACCOUNT_DETAIL.availableLabel}
+          amount={`${amount} ${code}`}
+          subtitle={ACCOUNT_DETAIL.accountRef}
+          scrollY={scrollY}
+          actions={[
+            { icon: { ios: 'arrow.up', android: 'arrow-upward' }, label: 'Send' },
+            { icon: { ios: 'plus', android: 'add' }, label: 'Add' },
+            { icon: { ios: 'arrow.left.arrow.right', android: 'swap-horiz' }, label: 'Convert' },
+            { icon: { ios: 'ellipsis', android: 'more-horiz' }, label: 'More', onPress: openMore },
+          ]}
+        />
+
+        {/* Backing for the area above the hero on overscroll. */}
+        <CollapsingHeroBacking c={c} />
 
         {/* transactions, grouped by date — or empty state */}
         {sections.length === 0 && !isLoading ? (
@@ -140,13 +148,6 @@ export function AccountMoreSheet({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  // hero (white, rounded bottom, sits flush under the native bar)
-  hero: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
-  heroLabel: { fontSize: 14, fontWeight: '500', textAlign: 'center', marginBottom: 8 },
-  heroAmount: { fontSize: 32, fontFamily: 'PPRightGrotesk-WideMedium', textAlign: 'center' },
-  heroRef: { fontSize: 12, fontWeight: '500', marginTop: 4, textAlign: 'center' },
-  heroButtons: { flexDirection: 'row', gap: 8, height: BTN_ROW_H },
-
   // transaction list
   list: { paddingHorizontal: 16, gap: 8, marginTop: 4 },
   section: { gap: 8, marginTop: 8 },

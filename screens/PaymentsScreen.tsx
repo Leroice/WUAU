@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, Theme, SPACING } from '../constants/theme';
 import { WidgetCard, ActionButton, StatusDot, Carousel, CarouselCard, CAROUSEL_CARD_W } from '../components/ui';
@@ -60,10 +60,13 @@ export function PaymentsScreen({ navigation }: any) {
 
   // Top navigation intentionally removed — clean slate, to be rebuilt fresh.
 
+  // Android: transparent native header doesn't auto-inset scroll content.
+  const androidHeaderPad = Platform.OS === 'android' ? insets.top + 56 : 0;
+
   return (
     <ScrollView
       style={{ backgroundColor: c.bg }}
-      contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 96 }]}
+      contentContainerStyle={[styles.scroll, { paddingTop: androidHeaderPad, paddingBottom: insets.bottom + 96 }]}
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
     >

@@ -299,19 +299,79 @@ const TX_CASH = { ios: 'banknote.fill', android: 'payments' };
 const TX_BANK = { ios: 'building.columns.fill', android: 'account-balance' };
 const TX_XFER = { ios: 'arrow.left.arrow.right', android: 'swap-horiz' };
 
+// Long list (~60 rows across ~15 date sections) so the scroll interaction can
+// be assessed end-to-end with realistic content density.
 export const ACCOUNT_TXNS: TxnSection[] = [
   { date: '8 March 2026', items: [
     { title: 'Woolworths', sub: '11:04AM • Melbourne', amount: '180.22 AUD', status: 'Pending', icon: TX_CART },
     { title: 'ATM withdrawal', sub: '09:15AM • Richmond', amount: '500.00 AUD', icon: TX_CASH },
+    { title: 'Uber Eats', sub: '08:32PM • Fitzroy', amount: '42.10 AUD', icon: TX_CART },
+  ] },
+  { date: '7 March 2026', items: [
+    { title: 'Salary — Acme Co', sub: '09:00AM • Direct deposit', amount: '+4,250.00 AUD', positive: true, icon: TX_BANK },
+    { title: 'Spotify', sub: '12:14AM • Subscription', amount: '11.99 AUD', icon: TX_XFER },
   ] },
   { date: '6 March 2026', items: [
     { title: 'Cash deposit', sub: '09:15PM • Richmond', amount: '+350.00 AUD', positive: true, icon: TX_BANK },
     { title: 'ATM withdrawal', sub: '09:15AM • Richmond', amount: '500.00 AUD', icon: TX_CASH },
     { title: 'Woolworths', sub: '11:04AM • Melbourne', amount: '58.46 AUD', status: 'Pending', icon: TX_CART },
+    { title: 'Coles', sub: '06:48PM • Carlton', amount: '92.15 AUD', icon: TX_CART },
+  ] },
+  { date: '5 March 2026', items: [
+    { title: 'Transfer to Stack', sub: '02:11PM • Vow Renewal', amount: '200.00 AUD', icon: TX_XFER },
+    { title: 'Café Lune', sub: '08:02AM • Fitzroy', amount: '6.50 AUD', icon: TX_CART },
+    { title: 'Bunnings', sub: '04:42PM • Brunswick', amount: '78.30 AUD', icon: TX_CART },
+  ] },
+  { date: '4 March 2026', items: [
+    { title: 'Refund — JB Hi-Fi', sub: '01:21PM • Online', amount: '+129.00 AUD', positive: true, icon: TX_BANK },
+    { title: 'Apple', sub: '11:58AM • App Store', amount: '2.99 AUD', icon: TX_XFER },
+  ] },
+  { date: '3 March 2026', items: [
+    { title: 'Cotton On', sub: '03:14PM • Chadstone', amount: '64.00 AUD', icon: TX_CART },
+    { title: 'Petrol — Shell', sub: '09:40AM • Footscray', amount: '88.40 AUD', icon: TX_CART },
+    { title: 'ATM withdrawal', sub: '07:55PM • CBD', amount: '200.00 AUD', icon: TX_CASH },
   ] },
   { date: '2 March 2026', items: [
     { title: 'Woolworths', sub: '11:04AM • Melbourne', amount: '180.22 AUD', status: 'Pending', icon: TX_CART },
     { title: 'Cash deposit', sub: '09:15PM • Richmond', amount: '+350.00 AUD', positive: true, icon: TX_BANK },
+    { title: 'Transfer from Maya', sub: '07:18PM • Friend', amount: '+45.00 AUD', positive: true, icon: TX_XFER },
+  ] },
+  { date: '1 March 2026', items: [
+    { title: 'Netflix', sub: '12:00AM • Subscription', amount: '18.99 AUD', icon: TX_XFER },
+    { title: 'Rent', sub: '09:00AM • Landlord', amount: '1,650.00 AUD', icon: TX_BANK },
+    { title: 'IGA', sub: '06:27PM • Brunswick', amount: '34.18 AUD', icon: TX_CART },
+  ] },
+  { date: '28 February 2026', items: [
+    { title: 'Salary — Acme Co', sub: '09:00AM • Direct deposit', amount: '+4,250.00 AUD', positive: true, icon: TX_BANK },
+    { title: 'Myki top-up', sub: '08:14AM • Flinders St', amount: '40.00 AUD', icon: TX_XFER },
+  ] },
+  { date: '27 February 2026', items: [
+    { title: 'Officeworks', sub: '02:02PM • South Melbourne', amount: '128.74 AUD', icon: TX_CART },
+    { title: 'Pharmacy', sub: '05:31PM • Carlton', amount: '21.15 AUD', icon: TX_CART },
+    { title: 'ATM withdrawal', sub: '10:08AM • CBD', amount: '100.00 AUD', icon: TX_CASH },
+  ] },
+  { date: '26 February 2026', items: [
+    { title: 'Transfer to Stack', sub: '11:42AM • Holiday Fund', amount: '300.00 AUD', icon: TX_XFER },
+    { title: 'Dan Murphy\'s', sub: '07:14PM • Northcote', amount: '54.00 AUD', icon: TX_CART },
+  ] },
+  { date: '25 February 2026', items: [
+    { title: 'Café Lune', sub: '08:11AM • Fitzroy', amount: '7.20 AUD', icon: TX_CART },
+    { title: 'Refund — ASOS', sub: '02:42PM • Online', amount: '+82.00 AUD', positive: true, icon: TX_BANK },
+    { title: 'Uber', sub: '11:19PM • CBD → Home', amount: '24.80 AUD', icon: TX_XFER },
+  ] },
+  { date: '24 February 2026', items: [
+    { title: 'Woolworths', sub: '12:08PM • Melbourne', amount: '96.40 AUD', icon: TX_CART },
+    { title: 'JB Hi-Fi', sub: '04:55PM • Chadstone', amount: '249.00 AUD', icon: TX_CART },
+  ] },
+  { date: '23 February 2026', items: [
+    { title: 'ATM withdrawal', sub: '09:32AM • Richmond', amount: '200.00 AUD', icon: TX_CASH },
+    { title: 'Café Lune', sub: '08:04AM • Fitzroy', amount: '6.50 AUD', icon: TX_CART },
+    { title: 'Transfer from Eddie', sub: '06:47PM • Friend', amount: '+120.00 AUD', positive: true, icon: TX_XFER },
+  ] },
+  { date: '22 February 2026', items: [
+    { title: 'Cash deposit', sub: '10:01AM • Richmond', amount: '+500.00 AUD', positive: true, icon: TX_BANK },
+    { title: 'Coles', sub: '07:12PM • Carlton', amount: '71.30 AUD', icon: TX_CART },
+    { title: 'Petrol — BP', sub: '03:38PM • Footscray', amount: '74.10 AUD', icon: TX_CART },
   ] },
 ];
 

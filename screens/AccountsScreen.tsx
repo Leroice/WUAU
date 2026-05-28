@@ -150,7 +150,7 @@ export function AccountsScreen({ navigation }: any) {
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} showsVerticalScrollIndicator={false} contentInsetAdjustmentBehavior="automatic">
-        {/* Header card (white, rounded bottom) — flush under the native bar */}
+        {/* Header card (white, rounded bottom) — flush under the native nav bar */}
         <View style={[styles.header, { backgroundColor: c.surface, paddingTop: 8 }]}>
           <View style={styles.totalBlock}>
             <Text style={[styles.totalLabel, { color: c.muted }]}>{ACCOUNTS_PAGE.totalLabel}</Text>

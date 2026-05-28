@@ -4,7 +4,6 @@ import Animated, {
   useSharedValue, useAnimatedStyle, withTiming, withSequence, interpolate, Easing,
 } from 'react-native-reanimated';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
-import { accelerometer, setUpdateIntervalForType, SensorTypes } from 'react-native-sensors';
 import { WU_YELLOW } from '../constants/theme';
 import { useDesign } from '../hooks/useDesign';
 import { usePersona } from '../hooks/usePersona';
@@ -18,15 +17,12 @@ const RATIO = COLLAPSED_H / COLLAPSED_W;
 const EXPANDED_W = Dimensions.get('window').width - SCREEN_PAD * 2;
 const EXPANDED_H = Math.round(EXPANDED_W * RATIO);
 
-const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
-
 /**
  * Interactive wallet card:
  *  - tap → expands to full width AND flips on its Y axis (content below pushes down),
  *  - the TAP POSITION kicks the rotation across X+Y (tap a corner → unorthodox dual-axis
  *    tumble) that eases out so the card resolves to a clean, balanced face,
- *  - floats in space via accelerometer (real device only),
- *  - specular highlight sweeps across the front as it tilts.
+ *  - specular highlight sweeps across the front as it tilts via tap impulse.
  * Front is the @3x card art; back is drawn from CARD mock data.
  */
 export function WalletCard({ flipped, onToggle }: { flipped: boolean; onToggle: () => void }) {
@@ -35,25 +31,11 @@ export function WalletCard({ flipped, onToggle }: { flipped: boolean; onToggle: 
   const progress = useSharedValue(0); // 0 = collapsed/front, 1 = expanded/back
   const impX = useSharedValue(0); // touch-driven pitch impulse (decays)
   const impY = useSharedValue(0); // touch-driven roll impulse (decays)
-  const tiltX = useSharedValue(0); // gyro pitch
-  const tiltY = useSharedValue(0); // gyro roll
 
   useEffect(() => {
     // Fast out, ease into slow — resolves smoothly onto the target face.
     progress.value = withTiming(flipped ? 1 : 0, { duration: 760, easing: Easing.out(Easing.cubic) });
   }, [flipped, progress]);
-
-  useEffect(() => {
-    setUpdateIntervalForType(SensorTypes.accelerometer, 60);
-    const sub = accelerometer.subscribe({
-      next: ({ x, y }) => {
-        tiltX.value = withTiming(clamp(-y * 7, -12, 12), { duration: 120 });
-        tiltY.value = withTiming(clamp(x * 7, -12, 12), { duration: 120 });
-      },
-      error: () => {},
-    });
-    return () => sub.unsubscribe();
-  }, [tiltX, tiltY]);
 
   const onPressIn = (e: GestureResponderEvent) => {
     const cw = flipped ? EXPANDED_W : COLLAPSED_W;
@@ -73,22 +55,22 @@ export function WalletCard({ flipped, onToggle }: { flipped: boolean; onToggle: 
   const frontStyle = useAnimatedStyle(() => ({
     transform: [
       { perspective: 1200 },
-      { rotateX: `${tiltX.value + impX.value}deg` },
-      { rotateY: `${interpolate(progress.value, [0, 1], [0, 180]) + tiltY.value + impY.value}deg` },
+      { rotateX: `${impX.value}deg` },
+      { rotateY: `${interpolate(progress.value, [0, 1], [0, 180]) + impY.value}deg` },
     ],
   }));
 
   const backStyle = useAnimatedStyle(() => ({
     transform: [
       { perspective: 1200 },
-      { rotateX: `${tiltX.value + impX.value}deg` },
-      { rotateY: `${interpolate(progress.value, [0, 1], [180, 360]) + tiltY.value + impY.value}deg` },
+      { rotateX: `${impX.value}deg` },
+      { rotateY: `${interpolate(progress.value, [0, 1], [180, 360]) + impY.value}deg` },
     ],
   }));
 
-  // Specular sheen drifts opposite the tilt.
+  // Specular sheen drifts opposite the tap impulse (touch-only, no accelerometer).
   const sheenStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: -tiltY.value * 6 }, { translateY: -tiltX.value * 4 }],
+    transform: [{ translateX: -impY.value * 6 }, { translateY: -impX.value * 4 }],
   }));
 
   return (

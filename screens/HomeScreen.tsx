@@ -9,6 +9,7 @@ import {
   useColorScheme,
   StatusBar,
   Animated,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActionButton, WidgetCard, Carousel, CarouselCard, CAROUSEL_CARD_W, HeaderIconButton } from '../components/ui';
@@ -92,13 +93,18 @@ export function HomeScreen({ navigation }: any) {
     });
   }, [navigation, balanceHidden]);
 
+  // Android: transparent native header doesn't auto-inset the scroll content
+  // (contentInsetAdjustmentBehavior is iOS-only). Push content below status bar
+  // + header (56dp Material default) so the hero doesn't clash with the top bar.
+  const androidHeaderPad = Platform.OS === 'android' ? insets.top + 56 : 0;
+
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
 
       <ScrollView
         style={{ backgroundColor: c.bg }}
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 100 }]}
+        contentContainerStyle={[styles.scroll, { paddingTop: androidHeaderPad, paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
       >

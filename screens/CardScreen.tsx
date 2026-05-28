@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 import { CartesianChart, Line } from 'victory-native';
@@ -131,10 +131,13 @@ export function CardScreen({ navigation }: any) {
     if (key === 'details') setFlipped((f) => !f);
   };
 
+  // Android: transparent native header doesn't auto-inset scroll content.
+  const androidHeaderPad = Platform.OS === 'android' ? insets.top + 56 : 0;
+
   return (
     <ScrollView
       style={{ backgroundColor: c.bg }}
-      contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 96 }]}
+      contentContainerStyle={[styles.scroll, { paddingTop: androidHeaderPad, paddingBottom: insets.bottom + 96 }]}
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
     >

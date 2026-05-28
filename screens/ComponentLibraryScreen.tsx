@@ -5,6 +5,7 @@ import { useTheme, Theme, WU_YELLOW, SPACING } from '../constants/theme';
 import { useDesign, COMPONENT_LIBRARY, WEIGHTS, ComponentDef, Control, DesignTokens } from '../hooks/useDesign';
 import { Surface, WidgetCard, ListRow, ActionButton, SectionHeader, StatusDot, Carousel, CarouselCard, SegmentedControl, TransactionRow, HeaderIconButton, HeaderLogo } from '../components/ui';
 import { ConverterWidget, CurrencySelector } from '../components/ConverterWidget';
+import { CollapsingHero } from '../components/CollapsingHero';
 import { SystemIcon } from '../components/SystemIcon';
 import { usePersona, PERSONAS } from '../hooks/usePersona';
 
@@ -106,6 +107,24 @@ const CATALOG: { name: string; blurb: string; render: (c: Theme) => React.ReactN
     name: 'Send Money Converter',
     blurb: 'The Home converter widget — flip reverses flow (animated), live rate conversion, currency picker.',
     render: () => <ConverterWidget />,
+  },
+  {
+    name: 'Collapsing Hero',
+    blurb: 'Domain-agnostic sticky hero with collapsing action buttons. Label / amount / subtitle stay pinned; buttons fade and clip against the hero\'s rounded bottom EDGE (overflow:hidden + paddingBottom:0; the wrapper itself does NOT clip). Drive via a reanimated shared scrollY from the parent ScrollView (UI thread). Pair with <CollapsingHeroBacking/> for overscroll-safe surface above.',
+    render: (c) => (
+      <CollapsingHero
+        c={c}
+        label="Available balance"
+        amount="4,280.50 AUD"
+        subtitle="123456 123456789"
+        actions={[
+          { icon: { ios: 'arrow.up', android: 'arrow-upward' }, label: 'Send' },
+          { icon: { ios: 'plus', android: 'add' }, label: 'Add' },
+          { icon: { ios: 'arrow.left.arrow.right', android: 'swap-horiz' }, label: 'Convert' },
+          { icon: { ios: 'ellipsis', android: 'more-horiz' }, label: 'More' },
+        ]}
+      />
+    ),
   },
 ];
 
