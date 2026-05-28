@@ -197,6 +197,32 @@ export const CATALOGUE: Nudge[] = [
     },
   },
 
+  // ── Refer a friend — gated on engagement so it doesn't fire day 1 ──
+  //    Sits below the setup-tier nudges (Apple Pay, Order Card, first Jar);
+  //    surfaces once the user has done at least one transfer, hides once they
+  //    invite. $50/$50 per user spec.
+  {
+    id: 'refer_friend',
+    touchpoint: 'home_banner',
+    style: 'light-image',
+    priority: 50,
+    segmentScope: ['S1'],
+    showWhen: {
+      type: 'and',
+      rules: [
+        { type: 'flag_true', key: 'first_send_done' },
+        { type: 'flag_false', key: 'refer_friend_done' },
+      ],
+    },
+    hideWhen: { type: 'flag_true', key: 'refer_friend_done' },
+    dismiss: 'snooze_3d',
+    content: {
+      headline: 'Refer a friend, both get $50',
+      body: 'Send them a link. When they make their first transfer, $50 lands in both wallets.',
+      cta: { label: 'Invite a friend', action: 'refer_friend' },
+    },
+  },
+
   // ── Track transfer (always available for IMT-flavoured users) ──
   {
     id: 'track_transfer_s4',
