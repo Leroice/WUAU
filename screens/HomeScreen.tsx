@@ -17,6 +17,8 @@ import { ParticleBalance } from '../components/ParticleBalance';
 import { Squishy } from '../components/Squishy';
 import { ConverterWidget } from '../components/ConverterWidget';
 import { NudgeBannerStack } from '../components/NudgeBannerStack';
+import { TrackTransferWidget } from '../components/TrackTransferWidget';
+import { SystemIcon } from '../components/SystemIcon';
 import { usePersona } from '../hooks/usePersona';
 import { WU_YELLOW } from '../constants/theme';
 import { HOME, QUICK_ACTIONS } from '../services/content';
@@ -63,6 +65,11 @@ export function HomeScreen({ navigation }: any) {
   const c = dark ? DARK : LIGHT;
   const insets = useSafeAreaInsets();
   const { persona } = usePersona();
+  // Home is segment-driven. Wallet users get the full layout (balance, currency
+  // cards, action buttons). Everyone else (S6/S7a/S4/S5b) gets the IMT-first
+  // layout per WU-eOne-Migration-UX-v0.2.docx — no balance, send/track only,
+  // banner zone carries the migration nudge.
+  const isWallet = persona.walletStatus === 'active';
   const { accounts, totalBalance, contacts, transactions } = persona;
   const [balanceHidden, setBalanceHidden] = useState(false);
   const reveal = useRef(new Animated.Value(0)).current; // 0 = balance shown, 1 = particles
@@ -109,6 +116,8 @@ export function HomeScreen({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
       >
+        {isWallet ? (
+        <>
         {/* BALANCE HERO */}
         <View style={styles.hero}>
           <Animated.Text style={[styles.balanceLabel, { color: c.muted, opacity: labelOpacity }]}>{HOME.totalBalanceLabel}</Animated.Text>
@@ -238,6 +247,59 @@ export function HomeScreen({ navigation }: any) {
             </View>
           ))}
         </WidgetCard>
+        </>
+        ) : (
+        // ─── IMT-first / migration home (S6, S7a, S4, S5b) ─────────────────
+        // No balance. No currency cards. No 3-up action button row. Send is
+        // primary (the converter); Track is primary (the MTCN widget). The
+        // banner zone carries the migration-specific nudge.
+        <>
+          {/* QUICK ACTIONS WIDGET — prior sends (track-back into them) */}
+          {contacts.length > 0 && (
+            <WidgetCard c={c} title={HOME.sections.quickActions} onPressHeader={() => {}} style={styles.widget}>
+              <Carousel snapWidth={CAROUSEL_CARD_W + CARD_GAP}>
+                {contacts.map((contact, i) => (
+                  <CarouselCard
+                    key={i}
+                    c={c}
+                    initials={contact.initials}
+                    avatarColor={contact.color}
+                    avatarTextColor={contact.textColor}
+                    title={`You sent ${contact.name}`}
+                    subtitle={contact.amount}
+                    action="Track transfer"
+                  />
+                ))}
+              </Carousel>
+            </WidgetCard>
+          )}
+
+          {/* NUDGE BANNER STACK — migration / S6 wallet intro / S5b retry / S4 resume / S7a value prop */}
+          <NudgeBannerStack style={styles.nudges} />
+
+          {/* SEND MONEY — converter is the primary action */}
+          <ConverterWidget style={styles.widget} navigation={navigation} />
+
+          {/* TRACK TRANSFER WIDGET — second primary; MTCN input */}
+          <View style={styles.widget}>
+            <TrackTransferWidget />
+          </View>
+
+          {/* Help / Find us — yellow utility buttons per Figma 8605-298286 */}
+          <View style={styles.helpRow}>
+            <Squishy scaleTo={0.97} style={styles.helpBtn} accessibilityRole="button" accessibilityLabel="Get help">
+              <SystemIcon ios="bubble.left.and.text.bubble.right.fill" android="chat" size={22} color="#000000" />
+              <Text style={styles.helpBtnLabel}>Get help</Text>
+              <Text style={styles.helpBtnSub}>Contact us and FAQs</Text>
+            </Squishy>
+            <Squishy scaleTo={0.97} style={styles.helpBtn} accessibilityRole="button" accessibilityLabel="Find us">
+              <SystemIcon ios="mappin.and.ellipse" android="location-on" size={22} color="#000000" />
+              <Text style={styles.helpBtnLabel}>Find us</Text>
+              <Text style={styles.helpBtnSub}>Search for agents & ATMs</Text>
+            </Squishy>
+          </View>
+        </>
+        )}
       </ScrollView>
     </View>
   );
@@ -302,6 +364,18 @@ const styles = StyleSheet.create({
   },
   widget: { marginHorizontal: 16, marginBottom: 16 },
   nudges: { marginHorizontal: 16, marginBottom: 24 },
+  // IMT home help/find-us footer — two yellow utility cards side by side.
+  helpRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 12, marginTop: 4 },
+  helpBtn: {
+    flex: 1,
+    backgroundColor: WU_YELLOW,
+    borderRadius: 16,
+    paddingVertical: 18,
+    alignItems: 'center',
+    gap: 6,
+  },
+  helpBtnLabel: { fontSize: 15, fontWeight: '700', color: '#000000' },
+  helpBtnSub: { fontSize: 11, color: '#000000', opacity: 0.8 },
   avatar: {
     width: 40,
     height: 40,
