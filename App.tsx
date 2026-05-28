@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TweaksProvider } from './hooks/useTweaks';
 import { PersonaProvider } from './hooks/usePersona';
 import { DesignProvider } from './hooks/useDesign';
+import { NudgeProvider } from './hooks/useNudgeState';
 import { RootNavigator } from './navigation/RootNavigator';
 
 // Thin entry: compose providers and mount the navigator. Everything else lives in
@@ -18,9 +19,11 @@ export default function App() {
         <TweaksProvider>
           <PersonaProvider>
             <DesignProvider>
-              <NavigationContainer theme={dark ? DarkTheme : DefaultTheme}>
-                <RootNavigator />
-              </NavigationContainer>
+              <NudgeProvider>
+                <NavigationContainer theme={dark ? DarkTheme : DefaultTheme}>
+                  <RootNavigator />
+                </NavigationContainer>
+              </NudgeProvider>
             </DesignProvider>
           </PersonaProvider>
         </TweaksProvider>

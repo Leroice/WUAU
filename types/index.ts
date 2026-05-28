@@ -5,5 +5,6 @@ export * from './transaction';
 export * from './home';
 export * from './segment';
 export * from './flag';
+export * from './nudge';
 export * from './persona';
 export * from './navigation';
