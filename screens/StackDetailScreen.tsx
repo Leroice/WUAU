@@ -2,10 +2,11 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated, Easing, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import { useTheme, Theme } from '../theme';
+import { useTheme, Theme } from '../constants/theme';
 import { SystemIcon } from '../components/SystemIcon';
 import { ActionButton, TransactionRow } from '../components/ui';
-import { STACK_TXNS, ACCOUNT_DETAIL } from '../mockData';
+import { ACCOUNT_DETAIL } from '../services/content';
+import { useStackDetail } from '../hooks/useStackDetail';
 
 const BTN_ROW_H = 60;
 
@@ -85,7 +86,7 @@ export function StackDetailScreen({ navigation, route }: any) {
   const progress: number | undefined = p.progress ?? 0.14;
   const targetDate: string | undefined = p.targetDate ?? '01/09/2026';
   const pct = progress != null ? ` (${Math.round(progress * 100)}%)` : '';
-  const sections = STACK_TXNS;
+  const { txns: sections } = useStackDetail(name);
   const scrollY = useRef(new Animated.Value(0)).current;
   // Hero hugs its content: measure the collapsible blocks instead of hard-coding
   // heights, so a bigger doughnut or more padding is never clipped or constrained.

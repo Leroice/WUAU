@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, TextInput, StyleSheet, useColorScheme } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
-import { useTheme, WU_YELLOW } from '../theme';
+import { useTheme, WU_YELLOW } from '../constants/theme';
 import { WIDGET_TITLE } from './ui';
 import { SystemIcon } from './SystemIcon';
 import { Squishy } from './Squishy';
-import { CONVERTER, TOP_CURRENCIES, ALL_CURRENCIES, RATES_PER_AUD, Currency } from '../mockData';
+import { CONVERTER, TOP_CURRENCIES, ALL_CURRENCIES, RATES_PER_AUD } from '../services/content';
+import type { Currency } from '../types';
 import { requestCurrency } from '../screens/ChooseCurrencyScreen';
 
 // number → "11,240.00" (manual formatter; no Intl dependency).

@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState } from 'react';
 import type { Persona } from '../types';
 import { PERSONAS } from '../services/personas';
 
+// Re-exposed for the persona switcher (App settings) — the one consumer that
+// needs the full list rather than just the active persona.
+export { PERSONAS };
+
 // Which demo persona is active. Selection is instant client state (a demo toggle);
 // the persona's data bundle comes from services/personas.
 type Ctx = { persona: Persona; setPersona: (id: string) => void };

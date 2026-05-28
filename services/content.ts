@@ -6,4 +6,7 @@ export {
   CARD_APPLE_PAY, CARD_INSIGHTS, PAYMENTS_SECTIONS, PAYMENTS_ACTIONS, PLACEHOLDERS,
   EXCHANGE_RATES, RATES_PER_AUD, TOP_CURRENCIES, ALL_CURRENCIES, AVAILABLE_BALANCE,
   TOTAL_BALANCE, QUICK_ACTIONS,
+  // Static demo data the Payments/Card screens read directly (persona-independent
+  // defaults). TODO: hookify those screens onto persona data + resource hooks.
+  CARD_SPENDS, PAYMENTS_CONTACTS, PAYMENTS_UPCOMING, PAYMENTS_RECENT,
 } from './data';

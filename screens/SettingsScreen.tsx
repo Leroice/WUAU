@@ -8,11 +8,11 @@ import {
   Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SETTINGS } from '../mockData';
+import { SETTINGS } from '../services/content';
 import { Squishy } from '../components/Squishy';
 import { SystemIcon } from '../components/SystemIcon';
-import { WU_YELLOW } from '../theme';
-import { usePersona } from '../PersonaContext';
+import { WU_YELLOW } from '../constants/theme';
+import { usePersona } from '../hooks/usePersona';
 
 type IconSpec = { ios: string; android: string };
 

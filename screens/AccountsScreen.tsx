@@ -2,12 +2,14 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, Animated, Easing } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import { useTheme, Theme, WU_YELLOW } from '../theme';
+import { useTheme, Theme, WU_YELLOW } from '../constants/theme';
 import { SystemIcon } from '../components/SystemIcon';
 import { Squishy } from '../components/Squishy';
 import { ActionButton, SegmentedControl } from '../components/ui';
-import { usePersona } from '../PersonaContext';
-import { ACCOUNTS_PAGE, STACKS, Stack } from '../mockData';
+import { usePersona } from '../hooks/usePersona';
+import { ACCOUNTS_PAGE } from '../services/content';
+import { useStacks } from '../hooks/useStacks';
+import type { Stack } from '../types';
 
 // Emoji flag in a 40pt circle (currency rows).
 function Flag({ c, emoji }: { c: Theme; emoji: string }) {
@@ -81,6 +83,7 @@ export function AccountsScreen({ navigation }: any) {
   const c = useTheme();
   const insets = useSafeAreaInsets();
   const { persona } = usePersona();
+  const { stacks } = useStacks();
   const [tab, setTab] = useState(0); // 0 = Currencies, 1 = Stacks
   const [prevTab, setPrevTab] = useState(0); // outgoing tab, shown during a transition
   const [transitioning, setTransitioning] = useState(false);
@@ -119,7 +122,7 @@ export function AccountsScreen({ navigation }: any) {
             onPress={() => navigation.navigate('AccountDetail', { code: a.code, amount: a.amount })}
           />
         ))
-      : STACKS.map((s: Stack, i: number) => (
+      : stacks.map((s: Stack, i: number) => (
           <AccountRow
             key={i}
             c={c}

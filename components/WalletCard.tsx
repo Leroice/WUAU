@@ -5,10 +5,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { accelerometer, setUpdateIntervalForType, SensorTypes } from 'react-native-sensors';
-import { WU_YELLOW } from '../theme';
-import { useDesign } from '../DesignContext';
-import { usePersona } from '../PersonaContext';
-import { CARD } from '../mockData';
+import { WU_YELLOW } from '../constants/theme';
+import { useDesign } from '../hooks/useDesign';
+import { usePersona } from '../hooks/usePersona';
+import { CARD } from '../services/content';
 
 const SCREEN_PAD = 20;
 // Collapsed = Figma card frame; expanded = fills the top section width.

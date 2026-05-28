@@ -3,15 +3,15 @@ import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from 'react-native-reanimated';
 import { CartesianChart, Line } from 'victory-native';
-import { useTheme, Theme, SPACING } from '../theme';
+import { useTheme, Theme, SPACING } from '../constants/theme';
 import { Surface, WidgetCard, ListRow, StatusDot, ActionButton } from '../components/ui';
 import { Squishy } from '../components/Squishy';
 import { SystemIcon } from '../components/SystemIcon';
 import { WalletCard } from '../components/WalletCard';
-import { usePersona } from '../PersonaContext';
+import { usePersona } from '../hooks/usePersona';
 import {
   CARD_ACTIONS, CARD_SPENDS, CARD_INSIGHTS, CARD_SETTINGS, CARD_APPLE_PAY, CARD_SECTIONS,
-} from '../mockData';
+} from '../services/content';
 
 const SCREEN_PAD = 20;
 

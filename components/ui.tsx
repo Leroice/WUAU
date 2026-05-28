@@ -4,8 +4,8 @@ import Svg, { Path } from 'react-native-svg';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { Squishy } from './Squishy';
 import { SystemIcon, IconSpec } from './SystemIcon';
-import { Theme, WU_YELLOW, SPACING, RADIUS } from '../theme';
-import { useDesign } from '../DesignContext';
+import { Theme, WU_YELLOW, SPACING, RADIUS } from '../constants/theme';
+import { useDesign } from '../hooks/useDesign';
 
 /**
  * Canonical widget-header title type — the "Send Money" style. Shared by every

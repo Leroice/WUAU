@@ -1,9 +1,9 @@
 import React, { useLayoutEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../theme';
+import { useTheme } from '../constants/theme';
 import { SystemIcon } from '../components/SystemIcon';
-import { TOP_CURRENCIES, ALL_CURRENCIES } from '../mockData';
+import { TOP_CURRENCIES, ALL_CURRENCIES } from '../services/content';
 
 // Bridge the picker result back to the converter widget without putting a
 // non-serializable callback in navigation params (avoids RN's serialize warning).

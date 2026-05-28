@@ -1,10 +1,11 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../theme';
+import { useTheme } from '../constants/theme';
 import { SystemIcon } from '../components/SystemIcon';
 import { ActionButton, TransactionRow } from '../components/ui';
-import { ACCOUNT_TXNS, ACCOUNT_DETAIL, ACCOUNT_MORE } from '../mockData';
+import { ACCOUNT_DETAIL, ACCOUNT_MORE } from '../services/content';
+import { useAccountDetail } from '../hooks/useAccountDetail';
 
 const BTN_ROW_H = 60;
 
@@ -28,7 +29,7 @@ export function AccountDetailScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
   const code: string = route?.params?.code ?? 'AUD';
   const amount: string = route?.params?.amount ?? '0.00';
-  const sections = ACCOUNT_TXNS;
+  const { txns: sections, isLoading } = useAccountDetail(code);
   const scrollY = useRef(new Animated.Value(0)).current;
 
   useLayoutEffect(() => {
@@ -68,7 +69,7 @@ export function AccountDetailScreen({ navigation, route }: any) {
         </View>
 
         {/* transactions, grouped by date — or empty state */}
-        {sections.length === 0 ? (
+        {sections.length === 0 && !isLoading ? (
           <View style={styles.empty}>
             <SystemIcon ios="tray" android="inbox" size={48} color={c.muted} />
             <Text style={[styles.emptyTitle, { color: c.text }]}>{ACCOUNT_DETAIL.emptyTitle}</Text>
