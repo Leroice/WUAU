@@ -15,4 +15,5 @@ export type RootStackParamList = {
     targetDate?: string;
   };
   AccountMore: { code: string };
+  NudgeStory: undefined;
 };

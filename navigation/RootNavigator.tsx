@@ -15,6 +15,7 @@ import { JarDetailScreen } from '../screens/JarDetailScreen';
 import { CardScreen } from '../screens/CardScreen';
 import { PaymentsScreen } from '../screens/PaymentsScreen';
 import { ComponentLibraryScreen } from '../screens/ComponentLibraryScreen';
+import { NudgeStoryScreen } from '../screens/NudgeStoryScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 
 const Tab = createNativeBottomTabNavigator();
@@ -159,6 +160,11 @@ export function RootNavigator() {
         name="AppSettings"
         component={ComponentLibraryScreen}
         options={{ ...navBar, headerShown: true, title: 'App settings' }}
+      />
+      <Stack.Screen
+        name="NudgeStory"
+        component={NudgeStoryScreen}
+        options={{ ...navBar, headerShown: true, title: 'Nudge framework' }}
       />
       <Stack.Screen
         name="ChooseCurrency"

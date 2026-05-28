@@ -330,6 +330,20 @@ export function ComponentLibraryScreen({ navigation }: any) {
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
     >
+      {/* Nudge framework — entry to the docs / live demo page. Surfaces here
+          because the persona switcher right below is the primary demo aid. */}
+      <Pressable
+        onPress={() => navigation.navigate('NudgeStory')}
+        style={[styles.storyEntry, { backgroundColor: WU_YELLOW }]}
+        accessibilityRole="button"
+        accessibilityLabel="Open nudge framework story"
+      >
+        <Text style={styles.storyEntryTitle}>Nudge framework</Text>
+        <Text style={styles.storyEntryBody}>
+          The segments, the catalogue, the first-month journey + live demo controls. Walk every scenario from one page.
+        </Text>
+      </Pressable>
+
       {/* Scenario — demo persona switcher. Now segment-aware: each chip surfaces
           the migration segment underneath the label so the journey is obvious. */}
       <View style={styles.block}>
@@ -412,6 +426,9 @@ const styles = StyleSheet.create({
   miniVisa: { fontSize: 18, fontWeight: '800', fontStyle: 'italic', color: '#000000' },
   json: { fontFamily: 'Courier', fontSize: 12, padding: 12, borderRadius: 12, lineHeight: 18 },
   logBtn: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 8 },
+  storyEntry: { borderRadius: 16, padding: 16, gap: 6 },
+  storyEntryTitle: { fontSize: 18, fontWeight: '700', color: '#000000' },
+  storyEntryBody: { fontSize: 13, lineHeight: 18, color: '#000000', opacity: 0.85 },
   personaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   personaChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 2 },
   personaLabel: { fontSize: 14, fontWeight: '600' },

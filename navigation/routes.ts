@@ -8,4 +8,5 @@ export const ROUTES = {
   ACCOUNT_DETAIL: 'AccountDetail',
   JAR_DETAIL: 'JarDetail',
   ACCOUNT_MORE: 'AccountMore',
+  NUDGE_STORY: 'NudgeStory',
 } as const;
